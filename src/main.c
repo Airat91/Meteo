@@ -233,8 +233,8 @@ int main(void){
     osThreadDef(display_task, display_task, osPriorityNormal, 0, configMINIMAL_STACK_SIZE*4);
     displayTaskHandle = osThreadCreate(osThread(display_task), NULL);
 
-    osThreadDef(adc_task, adc_task, osPriorityNormal, 0, configMINIMAL_STACK_SIZE*3);
-    adcTaskHandle = osThreadCreate(osThread(adc_task), NULL);
+    /*osThreadDef(adc_task, adc_task, osPriorityNormal, 0, configMINIMAL_STACK_SIZE*3);
+    adcTaskHandle = osThreadCreate(osThread(adc_task), NULL);*/
 
     osThreadDef(buttons_task, buttons_task, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
     buttonsTaskHandle = osThreadCreate(osThread(buttons_task), NULL);
@@ -248,8 +248,8 @@ int main(void){
     osThreadDef(uart_task, uart_task, osPriorityHigh, 0, configMINIMAL_STACK_SIZE*4);
     uartTaskHandle = osThreadCreate(osThread(uart_task), NULL);
 
-    osThreadDef(control_task, control_task, osPriorityHigh, 0, configMINIMAL_STACK_SIZE*2);
-    controlTaskHandle = osThreadCreate(osThread(control_task), NULL);
+    /*osThreadDef(control_task, control_task, osPriorityHigh, 0, configMINIMAL_STACK_SIZE*2);
+    controlTaskHandle = osThreadCreate(osThread(control_task), NULL);*/
 
     /*osThreadDef(ds18_task, ds18_task, osPriorityHigh, 0, configMINIMAL_STACK_SIZE*2);
     ds18TaskHandle = osThreadCreate(osThread(ds18_task), NULL);*/
@@ -877,7 +877,7 @@ static void main_page_print(u8 tick){
 #if(DISP == LCD_DISP)
     LCD_set_xy(76,26);
     if(dcts_rele[FAN_CONVECTION].state.control == 0){
-        LCD_print_char(6,&Icon_16x16,LCD_COLOR_BLACK);
+        /*LCD_print_char(6,&Icon_16x16,LCD_COLOR_BLACK);
     }else{
         switch(tick%4){
         case 0:
@@ -968,7 +968,7 @@ static void main_page_print(u8 tick){
             LCD_print_char(14,&Icon_16x16,LCD_COLOR_BLACK);
             LCD_fill_area(104,12,109,28,LCD_COLOR_WHITE);
             break;
-        }
+        }*/
     }
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(92,94,17,17,ST7735_WHITE);
@@ -1077,14 +1077,14 @@ static void main_page_print(u8 tick){
     }else{
         sprintf(string,"Обрыв");
     }
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     LCD_set_xy(0,48);
     if(dcts_meas[HUM_OUT].valid == 1){
         sprintf(string,"%.1f%s",(double)dcts_meas[HUM_OUT].value,dcts_meas[HUM_OUT].unit_cyr);
     }else{
         sprintf(string,"датчика");
     }
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK); 
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(0,111,36,17,ST7735_WHITE);
     st7735_xy(0,119);
@@ -1109,7 +1109,7 @@ static void main_page_print(u8 tick){
 #if(DISP == LCD_DISP)
     LCD_set_xy(3,31);
     if(dcts_rele[FAN_IN].state.control == 0){
-        LCD_print_char(6,&Icon_16x16,LCD_COLOR_BLACK);
+        /*LCD_print_char(6,&Icon_16x16,LCD_COLOR_BLACK);
     }else{
         switch(tick%4){
         case 0:
@@ -1124,7 +1124,7 @@ static void main_page_print(u8 tick){
         case 3:
             LCD_print_char(5,&Icon_16x16,LCD_COLOR_BLACK);
             break;
-        }
+        }*/
     }
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(3,94,17,17,ST7735_WHITE);
@@ -1154,13 +1154,13 @@ static void main_page_print(u8 tick){
     LCD_fill_area(0,21,1,48,LCD_COLOR_BLACK);
     LCD_fill_area(20,21,21,48,LCD_COLOR_BLACK);
     LCD_set_xy(3,12);
-    if(dcts_act[VALVE_IN].set_value < 10.0f){
+    /*if(dcts_act[VALVE_IN].set_value < 10.0f){
         LCD_print_char(16,&Icon_16x16,LCD_COLOR_BLACK);
     }else if((dcts_act[VALVE_IN].set_value >= 10.0f)&&(dcts_act[VALVE_IN].set_value <= 90.0f)){
         LCD_print_char(17,&Icon_16x16,LCD_COLOR_BLACK);
     }else if(dcts_act[VALVE_IN].set_value > 90.0f){
         LCD_print_char(18,&Icon_16x16,LCD_COLOR_BLACK);
-    }
+    }*/
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(1,80,1,31,ST7735_BLACK);
     st7735_fill_rect(20,80,1,31,ST7735_BLACK);
@@ -1180,13 +1180,13 @@ static void main_page_print(u8 tick){
     LCD_fill_area(107,52,108,63,LCD_COLOR_BLACK);
     LCD_fill_area(126,52,127,63,LCD_COLOR_BLACK);
     LCD_set_xy(110,43);
-    if(dcts_act[VALVE_OUT].set_value < 10.0f){
+    /*if(dcts_act[VALVE_OUT].set_value < 10.0f){
         LCD_print_char(16,&Icon_16x16,LCD_COLOR_BLACK);
     }else if((dcts_act[VALVE_OUT].set_value >= 10.0f)&&(dcts_act[VALVE_OUT].set_value <= 90.0f)){
         LCD_print_char(17,&Icon_16x16,LCD_COLOR_BLACK);
     }else if(dcts_act[VALVE_OUT].set_value > 90.0f){
         LCD_print_char(18,&Icon_16x16,LCD_COLOR_BLACK);
-    }
+    }*/
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(139,80,1,48,ST7735_BLACK);
     st7735_fill_rect(158,80,1,48,ST7735_BLACK);
@@ -1205,7 +1205,7 @@ static void main_page_print(u8 tick){
 #if(DISP == LCD_DISP)
     LCD_set_xy(94,0);
     if(dcts_rele[WTR_PUMP].state.control == 0){
-        LCD_print_char(20,&Icon_16x16,LCD_COLOR_BLACK);
+        /*LCD_print_char(20,&Icon_16x16,LCD_COLOR_BLACK);
     }else{
         switch(tick%2){
         case 0:
@@ -1214,7 +1214,7 @@ static void main_page_print(u8 tick){
         case 1:
             LCD_print_char(21,&Icon_16x16,LCD_COLOR_BLACK);
             break;
-        }
+        }*/
     }
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(126,0,17,17,ST7735_WHITE);
@@ -1238,7 +1238,7 @@ static void main_page_print(u8 tick){
     LCD_set_xy(111,0);
     if(dcts_meas[WTR_MIN_RES].value > config.params.wtr_min_ref){
         //empty
-        LCD_print_char(22,&Icon_16x16,LCD_COLOR_BLACK);
+        /*LCD_print_char(22,&Icon_16x16,LCD_COLOR_BLACK);
     }else if((dcts_meas[WTR_MIN_RES].value < config.params.wtr_min_ref)&&(dcts_meas[WTR_MAX_RES].value > config.params.wtr_max_ref)){
         //min level
         switch(tick%2){
@@ -1258,7 +1258,7 @@ static void main_page_print(u8 tick){
         case 1:
             LCD_print_char(26,&Icon_16x16,LCD_COLOR_BLACK);
             break;
-        }
+        }*/
     }
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(143,0,17,17,ST7735_WHITE);
@@ -1293,7 +1293,7 @@ static void main_page_print(u8 tick){
 #if(DISP == LCD_DISP)
     LCD_set_xy(40,26);
     if(dcts_rele[HEATER].state.control == 1){
-        switch(tick%4){
+        /*switch(tick%4){
         case 0:
             LCD_print_char(7,&Icon_16x16,LCD_COLOR_BLACK);
             break;
@@ -1306,7 +1306,7 @@ static void main_page_print(u8 tick){
         case 3:
             LCD_print_char(10,&Icon_16x16,LCD_COLOR_BLACK);
             break;
-        }
+        }*/
     }
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(52,94,17,17,ST7735_WHITE);
@@ -1333,7 +1333,7 @@ static void main_page_print(u8 tick){
 #if(DISP == LCD_DISP)
     LCD_set_xy(58,26);
     if(dcts_rele[FREEZER].state.control == 1){
-        LCD_print_char(11,&Icon_16x16,LCD_COLOR_BLACK);
+        //LCD_print_char(11,&Icon_16x16,LCD_COLOR_BLACK);
     }
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(72,94,17,17,ST7735_WHITE);
@@ -1360,8 +1360,8 @@ static void main_page_print(u8 tick){
     }else{
         sprintf(string,"Обрыв  обоих  ");
     }
-    LCD_set_xy(align_text_right(string,Font_5x7)-36,7);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_set_xy(align_text_right(string,Font_7x10)-36,7);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
 
     if(dcts_meas[HUM_IN_AVG].valid == 1){
         if(dcts_act[HUM_IN].state.control == 1){
@@ -1372,8 +1372,8 @@ static void main_page_print(u8 tick){
     }else{
         sprintf(string,"датчиков    ");
     }
-    LCD_set_xy(align_text_right(string,Font_5x7)-36,0);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_set_xy(align_text_right(string,Font_7x10)-36,0);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(0,0,94,17,ST7735_WHITE);
     if(dcts_meas[TMPR_IN_AVG].valid == 1){
@@ -1410,8 +1410,8 @@ static void main_page_print(u8 tick){
     //time
 #if(DISP == LCD_DISP)
     sprintf(string,"%02d:%02d:%02d",dcts.dcts_rtc.hour,dcts.dcts_rtc.minute,dcts.dcts_rtc.second);
-    LCD_set_xy(align_text_center(string,Font_5x7),45);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_set_xy(align_text_center(string,Font_7x10),45);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(16,45,129,27,ST7735_WHITE);
     sprintf(string,"%02d:%02d:%02d",dcts.dcts_rtc.hour,dcts.dcts_rtc.minute,dcts.dcts_rtc.second);
@@ -2245,25 +2245,25 @@ static void info_print (void){
 #if(DISP == LCD_DISP)
     sprintf(string, "Имя:%s",dcts.dcts_name_cyr);
     LCD_set_xy(2,44);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     sprintf(string, "Адрес:%d",dcts.dcts_address);
     LCD_set_xy(2,36);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     sprintf(string, "Версия:%s",dcts.dcts_ver);
     LCD_set_xy(2,28);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     sprintf(string, "Питание:%.1fВ",(double)dcts.dcts_pwr);
     LCD_set_xy(2,20);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     sprintf(string, "Батарейка:%.1fВ",(double)dcts_meas[VBAT_VLT].value);
     LCD_set_xy(2,12);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     sprintf(string, "%02d:%02d:%02d", dcts.dcts_rtc.hour, dcts.dcts_rtc.minute, dcts.dcts_rtc.second);
     LCD_set_xy(70,44);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     sprintf(string, "%02d.%02d.%04d", dcts.dcts_rtc.day, dcts.dcts_rtc.month, dcts.dcts_rtc.year);
     LCD_set_xy(70,36);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
 #elif(DISP == ST7735_DISP)
     sprintf(string, "Имя:%s",dcts.dcts_name_cyr);
     st7735_xy(2,44);
@@ -2645,7 +2645,7 @@ static void save_page_print (u8 tick){
     LCD_set_xy(align_text_center(string, Font_7x10),32);
     LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     LCD_set_xy(55,6);
-    LCD_print_char(1,&Icon_16x16,LCD_COLOR_BLACK);
+    //LCD_print_char(1,&Icon_16x16,LCD_COLOR_BLACK);
     switch(tick%4){
     case 0:
         LCD_fill_area(55,10,71,22,LCD_COLOR_WHITE);
@@ -3206,7 +3206,7 @@ static void print_back(void){
 #if(DISP == LCD_DISP)
     sprintf(string, "<назад");
     LCD_set_xy(0,0);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     LCD_invert_area(0,0,30,8);
 #elif(DISP == ST7735_DISP)
     sprintf(string, "<назад");
@@ -3220,8 +3220,8 @@ static void print_enter_right(void){
     char string[100];
 #if(DISP == LCD_DISP)
     sprintf(string, "выбор>");
-    LCD_set_xy(align_text_right(string,Font_5x7),0);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_set_xy(align_text_right(string,Font_7x10),0);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     LCD_invert_area(97,0,127,8);
 #elif(DISP == ST7735_DISP)
     sprintf(string, "выбор>");
@@ -3235,8 +3235,8 @@ static void print_enter_ok(void){
     char string[100];
 #if(DISP == LCD_DISP)
     sprintf(string, "ввод*");
-    LCD_set_xy(align_text_center(string,Font_5x7),0);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_set_xy(align_text_center(string,Font_7x10),0);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     LCD_invert_area(51,0,76,8);
 #elif(DISP == ST7735_DISP)
     sprintf(string, "ввод*");
@@ -3250,8 +3250,8 @@ static void print_change(void){
     char string[100];
 #if(DISP == LCD_DISP)
     sprintf(string, "изменить>");
-    LCD_set_xy(align_text_right(string,Font_5x7),0);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_set_xy(align_text_right(string,Font_7x10),0);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     LCD_invert_area(82,0,127,8);
 #elif(DISP == ST7735_DISP)
     sprintf(string, "изменить>");

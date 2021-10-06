@@ -1,0 +1,15 @@
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/CMakeFiles/freertos_lib.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/CMakeFiles/stm32f1_hal_lib.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/CMakeFiles/install/strip.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/CMakeFiles/Cellar.elf.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/CMakeFiles/install.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/CMakeFiles/install/local.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/CMakeFiles/edit_cache.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/CMakeFiles/rebuild_cache.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/CMakeFiles/list_install_components.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/freertos/CMakeFiles/install/local.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/freertos/CMakeFiles/install.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/freertos/CMakeFiles/edit_cache.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/freertos/CMakeFiles/rebuild_cache.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/freertos/CMakeFiles/list_install_components.dir
+C:/GitProjects/STM32F103Micro/Cellar/cmake_arm/freertos/CMakeFiles/install/strip.dir

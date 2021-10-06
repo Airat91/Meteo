@@ -1,0 +1,41 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/Cellar.elf.dir/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c.obj"
+  "CMakeFiles/Cellar.elf.dir/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c.obj"
+  "CMakeFiles/Cellar.elf.dir/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c.obj"
+  "CMakeFiles/Cellar.elf.dir/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c.obj"
+  "CMakeFiles/Cellar.elf.dir/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc_if_template.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/LCD.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/adc.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/am2302.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/buttons.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/ds18.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/flash.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/fonts.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/freertos.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/i2c.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/main.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/menu.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/onewire.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/ssd1306.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/st7735.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/step.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/stm32f1xx_hal_msp.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/stm32f1xx_hal_timebase_TIM.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/stm32f1xx_it.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/system_stm32f1xx.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/uart.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/usb_device.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/usbd_cdc_if.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/usbd_conf.c.obj"
+  "CMakeFiles/Cellar.elf.dir/src/usbd_desc.c.obj"
+  "CMakeFiles/Cellar.elf.dir/modules/DCTS/src/dcts.c.obj"
+  "CMakeFiles/Cellar.elf.dir/modules/DCTS/src/modbus.c.obj"
+  "Cellar.elf.pdb"
+  "Cellar.elf"
+  "Cellar.elf.manifest"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang C)
+  include(CMakeFiles/Cellar.elf.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()
