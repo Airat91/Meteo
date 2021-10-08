@@ -74,7 +74,7 @@ extern const uint16_t Icon16x16[];
  * @brief  5 x 7 pixels font size structure
  * @ingroup FONTS
  */
-extern FontDef_t Font_7x10;
+extern FontDef_t Font_5x7;
 
 /**
  * @brief Data of Font_5x7
