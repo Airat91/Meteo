@@ -14,70 +14,54 @@
 #define CH_3_PIN        GPIO_PIN_3
 #define PWR_PORT        GPIOA
 #define PWR_PIN         GPIO_PIN_4
-#define DO_1_PORT       GPIOA
-#define DO_1_PIN        GPIO_PIN_5
-#define CH_4_PORT       GPIOA
-#define CH_4_PIN        GPIO_PIN_6
-#define CH_5_PORT       GPIOA
-#define CH_5_PIN        GPIO_PIN_7
-#define OK_PORT         GPIOA
-#define OK_PIN          GPIO_PIN_8
+
+#define LED_CON_R_PORT  GPIOA
+#define LED_CON_R_PIN   GPIO_PIN_6
+#define LED_SYS_R_PORT  GPIOA
+#define LED_SYS_R_PIN   GPIO_PIN_7
+
 #define RS_485_TX_PORT  GPIOA
 #define RS_485_TX_PIN   GPIO_PIN_9
 #define RS_485_RX_PORT  GPIOA
 #define RS_485_RX_PIN   GPIO_PIN_10
 #define RS_485_DE_PORT  GPIOA
 #define RS_485_DE_PIN   GPIO_PIN_11
-#define DO_5_PORT       GPIOA
-#define DO_5_PIN        GPIO_PIN_12
+#define SW1_PORT        GPIOA
+#define SW1_PIN          GPIO_PIN_12
 #define DEBUG_TMS_PORT  GPIOA
 #define DEBUG_TMS_PIN   GPIO_PIN_13
 #define DEBUG_TCK_PORT  GPIOA
 #define DEBUG_TCK_PIN   GPIO_PIN_14
-#define LCD_CS_PORT     GPIOA
-#define LCD_CS_PIN      GPIO_PIN_15
-    #define ST7735_CS_PORT  LCD_CS_PORT
-    #define ST7735_CS_PIN   LCD_CS_PIN
+#define SW2_PORT        GPIOA
+#define SW2_PIN         GPIO_PIN_15
 
-#define CH_6_PORT       GPIOB
-#define CH_6_PIN        GPIO_PIN_0
-#define CH_7_PORT       GPIOB
-#define CH_7_PIN        GPIO_PIN_1
+#define LED_SYS_G_PORT  GPIOB
+#define LED_SYS_G_PIN   GPIO_PIN_0
+#define LED_CON_G_PORT  GPIOB
+#define LED_CON_G_PIN   GPIO_PIN_1
 
-#define LCD_SCK_PORT    GPIOB
-#define LCD_SCK_PIN     GPIO_PIN_3
-    #define ST7735_SCK_PORT LCD_SCK_PORT
-    #define ST7735_SCK_PIN  LCD_SCK_PIN
-#define LCD_RST_PORT    GPIOB
-#define LCD_RST_PIN     GPIO_PIN_4
-    #define ST7735_A0_PORT  LCD_RST_PORT
-    #define ST7735_A0_PIN   LCD_RST_PIN
-#define LCD_MOSI_PORT   GPIOB
-#define LCD_MOSI_PIN    GPIO_PIN_5
-    #define ST7735_MOSI_PORT    LCD_MOSI_PORT
-    #define ST7735_MOSI_PIN     LCD_MOSI_PIN
-#define LCD_LIGHT_PORT  GPIOB
-#define LCD_LIGHT_PIN   GPIO_PIN_6
-#define DO_4_PORT       GPIOB
-#define DO_4_PIN        GPIO_PIN_7
-#define DO_3_PORT       GPIOB
-#define DO_3_PIN        GPIO_PIN_8
-#define DO_2_PORT       GPIOB
-#define DO_2_PIN        GPIO_PIN_9
-#define BREAK_PORT      GPIOB
-#define BREAK_PIN       GPIO_PIN_10
-#define SET_PORT        GPIOB
-#define SET_PIN         GPIO_PIN_11
 #define UP_PORT         GPIOB
-#define UP_PIN          GPIO_PIN_12
-#define DOWN_PORT       GPIOB
-#define DOWN_PIN        GPIO_PIN_13
-#define LEFT_PORT       GPIOB
-#define LEFT_PIN        GPIO_PIN_14
+#define UP_PIN          GPIO_PIN_3
 #define RIGHT_PORT      GPIOB
-#define RIGHT_PIN       GPIO_PIN_15
+#define RIGHT_PIN       GPIO_PIN_4
+#define LEFT_PORT       GPIOB
+#define LEFT_PIN        GPIO_PIN_5
+#define OK_PORT         GPIOB
+#define OK_PIN          GPIO_PIN_6
+#define DOWN_PORT       GPIOB
+#define DOWN_PIN        GPIO_PIN_7
+#define CAN_TX_PORT     GPIOB
+#define CAN_TX_PIN      GPIO_PIN_8
+#define CAN_RX_PORT     GPIOB
+#define CAN_RX_PIN      GPIO_PIN_9
+#define SDA_PORT        GPIOB
+#define SDA_PIN         GPIO_PIN_10
+#define SCL_PORT        GPIOB
+#define SCL_PIN         GPIO_PIN_11
+#define AM2302_PORT     GPIOB
+#define AM2302_PIN      GPIO_PIN_12
 
-#define DO_0_PORT        GPIOC
-#define DO_0_PIN         GPIO_PIN_13
+#define LED_PORT        GPIOC
+#define LED_PIN         GPIO_PIN_13
 
 #endif // PIN_MAP_H

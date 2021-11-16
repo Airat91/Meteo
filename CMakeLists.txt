@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
-set(PRJ_NAME Meteo)
+set(PRJ_NAME Quadro)
 include(STM32Toolchain.cmake)
 
 set(MCU_FAMILY STM32F1xx)
