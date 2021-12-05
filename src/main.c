@@ -64,6 +64,7 @@
 #include "flash.h"
 #include "uart.h"
 #include "modbus.h"
+#include "time.h"
 //#include "ds18.h"
 
 /**
@@ -76,6 +77,10 @@
 #define DO_NUM 6
 #define IN_CHANNEL_NUM 8
 #define RTC_KEY 0xABCD
+
+#define RTC_HAL     1
+#define RTC_UNIX    2
+#define RTC_TIME    RTC_UNIX //(RTC_HAL or RTC_UNIX)
 
 #define LCD_DISP 1
 #define ST7735_DISP 2
@@ -110,6 +115,7 @@ void dcts_init (void);
 static void channels_init(void);
 static void MX_IWDG_Init(void);
 static void RTC_Init(void);
+static int RTC_write_cnt(time_t cnt_value);
 //static void MX_ADC1_Init(void);
 //static void MX_USART1_UART_Init(void);
 static void print_header(void);
@@ -375,8 +381,13 @@ void SystemClock_Config(void)
 
 /* RTC init function */
 static void RTC_Init(void){
-    RTC_TimeTypeDef Time = {0};
-    RTC_DateTypeDef Date = {0};
+#if (RTC_TIME == RTC_HAL)
+    RTC_TimeTypeDef sTime = {0};
+    RTC_DateTypeDef sDate = {0};
+#elif (RTC_TIME == RTC_UNIX)
+    time_t unix_time = 0;
+    struct tm system_time = {0};
+#endif // RTC_TIME
     __HAL_RCC_BKP_CLK_ENABLE();
     __HAL_RCC_PWR_CLK_ENABLE();
     __HAL_RCC_RTC_ENABLE();
@@ -394,18 +405,67 @@ static void RTC_Init(void){
         dcts.dcts_rtc.state = RTC_STATE_SET;
     }
     if(dcts.dcts_rtc.state == RTC_STATE_SET){
-        Time.Hours = dcts.dcts_rtc.hour;
-        Time.Minutes = dcts.dcts_rtc.minute;
-        Time.Seconds = dcts.dcts_rtc.second;
+#if (RTC_TIME == RTC_HAL)
+        sTime.Hours = dcts.dcts_rtc.hour;
+        sTime.Minutes = dcts.dcts_rtc.minute;
+        sTime.Seconds = dcts.dcts_rtc.second;
 
-        Date.Date = dcts.dcts_rtc.day;
-        Date.Month = dcts.dcts_rtc.month;
-        Date.Year = (uint8_t)(dcts.dcts_rtc.year - 2000);
+        sDate.Date = dcts.dcts_rtc.day;
+        sDate.Month = dcts.dcts_rtc.month;
+        sDate.Year = (uint8_t)(dcts.dcts_rtc.year - 2000);
 
-        HAL_RTC_SetTime(&hrtc, &Time, RTC_FORMAT_BIN);
-        HAL_RTC_SetDate(&hrtc, &Date, RTC_FORMAT_BIN);
+        HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+        HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+#elif (RTC_TIME == RTC_UNIX)
+
+        system_time.tm_hour = dcts.dcts_rtc.hour;
+        system_time.tm_min = dcts.dcts_rtc.minute;
+        system_time.tm_sec = dcts.dcts_rtc.second;
+
+        system_time.tm_mday = dcts.dcts_rtc.day;
+        system_time.tm_mon = dcts.dcts_rtc.month;
+        system_time.tm_year = dcts.dcts_rtc.year - 1900;
+
+        unix_time = mktime(&system_time);
+
+        RTC_write_cnt(unix_time);
+#endif //RTC_TIME
+        dcts.dcts_rtc.state = RTC_STATE_READY;
     }
-    dcts.dcts_rtc.state = RTC_STATE_READY;
+}
+/**
+ * @brief RTC_write_cnt
+ * @param cnt_value - time in unix format
+ * @return  0 - OK,\n
+ *          -1 - timeout error,\n
+ *          -2 - timeout error
+ */
+static int RTC_write_cnt(time_t cnt_value){
+    int result = 0;
+    u32 start = HAL_GetTick();
+    u32 timeout = 0;
+    PWR->CR |= PWR_CR_DBP;                                          //разрешить доступ к Backup области
+    while ((!(RTC->CRL & RTC_CRL_RTOFF))&&(timeout <= start + 500)){//проверить закончены ли изменения регистров RTC
+        osDelay(1);
+        timeout++;
+    }
+    if(timeout > start + 500){
+        result = -1;
+    }
+    RTC->CRL |= RTC_CRL_CNF;                                        //Разрешить Запись в регистры RTC
+    RTC->CNTH = (u32)cnt_value>>16;                                 //записать новое значение счетного регистра
+    RTC->CNTL = (u32)cnt_value;
+    RTC->CRL &= ~RTC_CRL_CNF;                                       //Запретить запись в регистры RTC
+    start = HAL_GetTick();
+    while ((!(RTC->CRL & RTC_CRL_RTOFF))&&(timeout <= start + 500)){//Дождаться окончания записи
+        osDelay(1);
+        timeout++;
+    }
+    if(timeout > start + 500){
+        result = -2;
+    }
+    PWR->CR &= ~PWR_CR_DBP;                                         //запретить доступ к Backup области
+    return result;
 }
 /**
  * @brief RTC task
@@ -414,18 +474,22 @@ static void RTC_Init(void){
  */
 #define RTC_TASK_PERIOD 500
 void rtc_task(void const * argument){
-
     (void)argument;
+#if (RTC_TIME == RTC_HAL)
     RTC_TimeTypeDef time = {0};
     RTC_DateTypeDef date = {0};
+#elif (RTC_TIME == RTC_UNIX)
+    time_t unix_time = 0;
+    struct tm system_time = {0};
+#endif // RTC_TIME
     RTC_Init();
     uint32_t last_wake_time = osKernelSysTick();
     while(1){
         switch (dcts.dcts_rtc.state) {
         case RTC_STATE_READY:   //update dcts_rtc from rtc
+#if (RTC_TIME == RTC_HAL)
             HAL_RTC_GetDate(&hrtc,&date,RTC_FORMAT_BIN);
             HAL_RTC_GetTime(&hrtc,&time,RTC_FORMAT_BIN);
-
             taskENTER_CRITICAL();
             dcts.dcts_rtc.hour = time.Hours;
             dcts.dcts_rtc.minute = time.Minutes;
@@ -436,8 +500,26 @@ void rtc_task(void const * argument){
             dcts.dcts_rtc.year = date.Year + 2000;
             dcts.dcts_rtc.weekday = date.WeekDay;
             taskEXIT_CRITICAL();
+#elif (RTC_TIME == RTC_UNIX)
+            unix_time = (time_t)(RTC->CNTL);
+            unix_time |= (time_t)(RTC->CNTH<<16);
+            system_time = *localtime(&unix_time);
+
+            taskENTER_CRITICAL();
+            dcts.dcts_rtc.hour      = (u8)system_time.tm_hour;
+            dcts.dcts_rtc.minute    = (u8)system_time.tm_min;
+            dcts.dcts_rtc.second    = (u8)system_time.tm_sec;
+
+            dcts.dcts_rtc.day       = (u8)system_time.tm_mday;
+            dcts.dcts_rtc.month     = (u8)system_time.tm_mon;
+            dcts.dcts_rtc.year      = (u8)system_time.tm_year + 1900;
+            dcts.dcts_rtc.weekday   = (u8)system_time.tm_wday;
+
+            taskEXIT_CRITICAL();
+#endif // RTC_TIME
             break;
         case RTC_STATE_SET:     //set new values from dcts_rtc
+#if (RTC_TIME == RTC_HAL)
             time.Hours = dcts.dcts_rtc.hour;
             time.Minutes = dcts.dcts_rtc.minute;
             time.Seconds = dcts.dcts_rtc.second;
@@ -448,7 +530,19 @@ void rtc_task(void const * argument){
 
             HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
             HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
+#elif (RTC_TIME == RTC_UNIX)
+            system_time.tm_hour = dcts.dcts_rtc.hour;
+            system_time.tm_min  = dcts.dcts_rtc.minute;
+            system_time.tm_sec  = dcts.dcts_rtc.second;
 
+            system_time.tm_mday = dcts.dcts_rtc.day;
+            system_time.tm_mon  = dcts.dcts_rtc.month;
+            system_time.tm_year = dcts.dcts_rtc.year - 1900;
+
+            unix_time = mktime(&system_time);
+
+            RTC_write_cnt(unix_time);
+#endif // RTC_TIME
             dcts.dcts_rtc.state = RTC_STATE_READY;
             break;
         default:
