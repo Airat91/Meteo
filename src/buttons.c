@@ -49,10 +49,10 @@ void buttons_task (void const * argument){
                 pressed_time[button].pressed += BUTTONS_TASK_PERIOD;
                 pressed_time[button].last_state = BUTTON_PRESSED;
                 //reset LCD backlight auto off timeout
-                LCD.auto_off_timeout = 0;
+                /*LCD.auto_off_timeout = 0;
                 if(LCD.backlight == LCD_BACKLIGHT_SHUTDOWN){
                     LCD_backlight_on();
-                }
+                }*/
             }else{
                 pressed_time[button].last_state = BUTTON_RELEASE;
                 //pressed_time[button].pressed = 0;
@@ -77,10 +77,6 @@ static void buttons_init(void){
     pressed_time[BUTTON_RIGHT].port = RIGHT_PORT;
     pressed_time[BUTTON_OK].pin     = OK_PIN;
     pressed_time[BUTTON_OK].port    = OK_PORT;
-    pressed_time[BUTTON_BREAK].pin  = BREAK_PIN;
-    pressed_time[BUTTON_BREAK].port = BREAK_PORT;
-    pressed_time[BUTTON_SET].pin    = SET_PIN;
-    pressed_time[BUTTON_SET].port   = SET_PORT;
 
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOA_CLK_ENABLE();

@@ -56,7 +56,7 @@
 #include "dcts_config.h"
 #include "pin_map.h"
 #include "buttons.h"
-#include "LCD.h"
+//#include "LCD.h"
 #include "adc.h"
 #include "portable.h"
 #include "am2302.h"
@@ -64,7 +64,7 @@
 #include "flash.h"
 #include "uart.h"
 #include "modbus.h"
-#include "ds18.h"
+//#include "ds18.h"
 
 /**
   * @defgroup MAIN
@@ -179,37 +179,12 @@ static const char ch_mode_descr[6][10] = {
     "ШИМ-выход",
 };
 
-in_channel_t input_ch[8] = {
+in_channel_t input_ch[CH_NUM] = {
     {.mode = CH_MODE_ADC,   .port = CH_0_PORT, .pin = CH_0_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_0, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_1},
     {.mode = CH_MODE_ADC,   .port = CH_1_PORT, .pin = CH_1_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_1, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_2},
     {.mode = CH_MODE_AM3202,.port = CH_2_PORT, .pin = CH_2_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_2, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_3},
     {.mode = CH_MODE_AM3202,.port = CH_3_PORT, .pin = CH_3_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_3, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_4},
-    {.mode = CH_MODE_AM3202,.port = CH_4_PORT, .pin = CH_4_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_6, .pwm_tim = TIM3, .pwm_channel = TIM_CHANNEL_1},
-    {.mode = CH_MODE_PWM,   .port = CH_5_PORT, .pin = CH_5_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_7, .pwm_tim = TIM3, .pwm_channel = TIM_CHANNEL_2},
-    {.mode = CH_MODE_PWM,   .port = CH_6_PORT, .pin = CH_6_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_8, .pwm_tim = TIM3, .pwm_channel = TIM_CHANNEL_3},
-    {.mode = CH_MODE_NONE,  .port = CH_7_PORT,.pin = CH_7_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_9, .pwm_tim = TIM3, .pwm_channel = TIM_CHANNEL_4},
 };
-
-/*const ch_t ch[8] = {
-    {.pin = CH_0_PIN, .port = CH_0_PORT},
-    {.pin = CH_1_PIN, .port = CH_1_PORT},
-    {.pin = CH_2_PIN, .port = CH_2_PORT},
-    {.pin = CH_3_PIN, .port = CH_3_PORT},
-    {.pin = CH_4_PIN, .port = CH_4_PORT},
-    {.pin = CH_5_PIN, .port = CH_5_PORT},
-    {.pin = CH_6_PIN, .port = CH_6_PORT},
-    {.pin = CH_7_PIN, .port = CH_7_PORT},
-};*/
-
-const ch_t do_ch[6] = {
-    {.pin = DO_0_PIN, .port = DO_0_PORT},
-    {.pin = DO_1_PIN, .port = DO_1_PORT},
-    {.pin = DO_2_PIN, .port = DO_2_PORT},
-    {.pin = DO_3_PIN, .port = DO_3_PORT},
-    {.pin = DO_4_PIN, .port = DO_4_PORT},
-    {.pin = DO_5_PIN, .port = DO_5_PORT},
-};
-
 
 /**
   * @brief  The application entry point.
@@ -245,8 +220,8 @@ int main(void){
     osThreadDef(navigation_task, navigation_task, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
     navigationtTaskHandle = osThreadCreate(osThread(navigation_task), NULL);
 
-    osThreadDef(uart_task, uart_task, osPriorityHigh, 0, configMINIMAL_STACK_SIZE*4);
-    uartTaskHandle = osThreadCreate(osThread(uart_task), NULL);
+    /*osThreadDef(uart_task, uart_task, osPriorityHigh, 0, configMINIMAL_STACK_SIZE*4);
+    uartTaskHandle = osThreadCreate(osThread(uart_task), NULL);*/
 
     /*osThreadDef(control_task, control_task, osPriorityHigh, 0, configMINIMAL_STACK_SIZE*2);
     controlTaskHandle = osThreadCreate(osThread(control_task), NULL);*/
@@ -267,12 +242,12 @@ void dcts_init (void) {
 
     dcts.dcts_id = DCTS_ID_COMBINED;
     strcpy (dcts.dcts_ver, "0.1.0");
-    strcpy (dcts.dcts_name, "Meteo");
-    strcpy (dcts.dcts_name_cyr, "Метео");
-    dcts.dcts_address = 0x0B;
+    strcpy (dcts.dcts_name, "Quadro");
+    strcpy (dcts.dcts_name_cyr, "Квадро");
+    dcts.dcts_address = 0x10;
     dcts.dcts_rtc.day = 1;
     dcts.dcts_rtc.month = 1;
-    dcts.dcts_rtc.year = 2000;
+    dcts.dcts_rtc.year = 2020;
     dcts.dcts_rtc.weekday = 6;
     dcts.dcts_rtc.hour = 12;
     dcts.dcts_rtc.minute = 0;
@@ -285,41 +260,56 @@ void dcts_init (void) {
 
     //meas_channels
 
-    dcts_meas_channel_init(TMPR_IN_1, "Tmpr 1", "Температура 1", "°C", "°C");
-    dcts_meas_channel_init(TMPR_IN_2, "Tmpr 2", "Температура 2", "°C", "°C");
-    dcts_meas_channel_init(TMPR_IN_AVG, "Tmpr avg", "Температура усред.", "°C", "°C");
-    dcts_meas_channel_init(HUM_IN_1, "Hum 1", "Влажность 1", "%", "%");
-    dcts_meas_channel_init(HUM_IN_2, "Hum 2", "Влажнсть 2", "%", "%");
-    dcts_meas_channel_init(HUM_IN_AVG, "Hum avg", "Влажность усред.", "%", "%");
-    dcts_meas_channel_init(TMPR_OUT, "Tmpr out", "Температура снаружи", "°C", "°C");
-    dcts_meas_channel_init(HUM_OUT, "Hum out", "Влажность снаружи", "%", "%");
-    dcts_meas_channel_init(WTR_MIN_RES, "Water min res", "Верх. уровень сопр.", "Ohm", "Ом");
-    dcts_meas_channel_init(WTR_MIN_ADC, "Water min ADC", "Верх. уровень АЦП", "adc", "adc");
-    dcts_meas_channel_init(WTR_MIN_VLT, "Water min V", "Верх. уровень В", "V", "В");
-    dcts_meas_channel_init(WTR_MAX_RES, "Water max res", "Ниж. уровень сопр.", "Ohm", "Ом");
-    dcts_meas_channel_init(WTR_MAX_ADC, "Water max ADC", "Ниж. уровень АЦП", "adc", "adc");
-    dcts_meas_channel_init(WTR_MAX_VLT, "Water max V", "Ниж. уровень В", "V", "В");
-    dcts_meas_channel_init(VREF_VLT, "Vref V", "Опорное напр. В", "V", "В");
-    dcts_meas_channel_init(VBAT_VLT, "RTC battery V", "Батарейка В", "V", "В");
+    dcts_meas_channel_init(TMPR_SELF,   "Tmpr",         "Температура",  "°C",   "°C");
+    dcts_meas_channel_init(HUM_SELF,    "Hum",          "Влажнсть",     "%",    "%");
+
+    dcts_meas_channel_init(CH_0_TMPR,   "CH_0 Tmpr",    "Кан_0 Темп.",  "°C",   "°C");
+    dcts_meas_channel_init(CH_0_HUM,    "CH_0 Hum",     "Кан_0 Влажн.", "%",    "%");
+    dcts_meas_channel_init(CH_0_ADC,    "CH_0 ADC",     "Кан_0 АЦП",    "adc",  "ацп");
+    dcts_meas_channel_init(CH_0_VLT,    "CH_0 VLT",     "Кан_0 Напр.",  "V",    "В");
+    dcts_meas_channel_init(CH_0_CNT,    "CH_0 CNT",     "Кан_0 Имп.",   "pls",  "имп");
+
+    dcts_meas_channel_init(CH_1_TMPR,   "CH_1 Tmpr",    "Кан_1 Темп.",  "°C",   "°C");
+    dcts_meas_channel_init(CH_1_HUM,    "CH_1 Hum",     "Кан_1 Влажн.", "%",    "%");
+    dcts_meas_channel_init(CH_1_ADC,    "CH_1 ADC",     "Кан_1 АЦП",    "adc",  "ацп");
+    dcts_meas_channel_init(CH_1_VLT,    "CH_1 VLT",     "Кан_1 Напр.",  "V",    "В");
+    dcts_meas_channel_init(CH_1_CNT,    "CH_1 CNT",     "Кан_1 Имп.",   "pls",  "имп");
+
+    dcts_meas_channel_init(CH_2_TMPR,   "CH_2 Tmpr",    "Кан_2 Темп.",  "°C",   "°C");
+    dcts_meas_channel_init(CH_2_HUM,    "CH_2 Hum",     "Кан_2 Влажн.", "%",    "%");
+    dcts_meas_channel_init(CH_2_ADC,    "CH_2 ADC",     "Кан_2 АЦП",    "adc",  "ацп");
+    dcts_meas_channel_init(CH_2_VLT,    "CH_2 VLT",     "Кан_2 Напр.",  "V",    "В");
+    dcts_meas_channel_init(CH_2_CNT,    "CH_2 CNT",     "Кан_2 Имп.",   "pls",  "имп");
+
+    dcts_meas_channel_init(CH_3_TMPR,   "CH_3 Tmpr",    "Кан_3 Темп.",  "°C",   "°C");
+    dcts_meas_channel_init(CH_3_HUM,    "CH_3 Hum",     "Кан_3 Влажн.", "%",    "%");
+    dcts_meas_channel_init(CH_3_ADC,    "CH_3 ADC",     "Кан_3 АЦП",    "adc",  "ацп");
+    dcts_meas_channel_init(CH_3_VLT,    "CH_3 VLT",     "Кан_3 Напр.",  "V",    "В");
+    dcts_meas_channel_init(CH_3_CNT,    "CH_3 CNT",     "Кан_3 Имп.",   "pls",  "имп");
+
+    dcts_meas_channel_init(VREF_VLT,    "Vref V",       "Опорное напр.","V",    "В");
+    dcts_meas_channel_init(VBAT_VLT,    "RTC battery V","Батарейка",    "V",    "В");
 
     //act_channels
 
-    dcts_act_channel_init(VALVE_IN, "Valve IN", "Клапан приточный", "%", "%");
-    dcts_act_channel_init(VALVE_OUT, "Valve OUT", "Клапан вытяжной", "%", "%");
-    dcts_act_channel_init(TMPR_IN_HEATING, "Tmpr IN heating", "Температура нагрев", "°C", "°C");
-    dcts_act_channel_init(TMPR_IN_COOLING, "Tmpr IN cooling", "Температура охлаждение", "°C", "°C");
-    dcts_act_channel_init(HUM_IN, "Hum IN", "Влажность", "%", "%");
-    dcts_act_channel_init(WTR_MIN_LVL, "Min level detect", "Минимальный уровень", "Ohm", "Ом");
-    dcts_act_channel_init(WTR_MIN_LVL, "Max level detect", "Максимальный уровень", "Ohm", "Ом");
+    dcts_act_channel_init(CH_0_DSCR_CTRL,   "CH_0 Rele out",    "Кан_0 Дискр. упр.","",     "");
+    dcts_act_channel_init(CH_0_PWM_CTRL,    "CH_0 PWM out",     "Кан_0 ШИМ упр.",   "%",    "%");
+
+    dcts_act_channel_init(CH_1_DSCR_CTRL,   "CH_1 Rele out",    "Кан_1 Дискр. упр.","",     "");
+    dcts_act_channel_init(CH_1_PWM_CTRL,    "CH_1 PWM out",     "Кан_1 ШИМ упр.",   "%",    "%");
+
+    dcts_act_channel_init(CH_2_DSCR_CTRL,   "CH_2 Rele out",    "Кан_2 Дискр. упр.","",     "");
+    dcts_act_channel_init(CH_2_PWM_CTRL,    "CH_2 PWM out",     "Кан_2 ШИМ упр.",   "%",    "%");
+
+    dcts_act_channel_init(CH_3_DSCR_CTRL,   "CH_3 Rele out",    "Кан_3 Дискр. упр.","",     "");
+    dcts_act_channel_init(CH_3_PWM_CTRL,    "CH_3 PWM out",     "Кан_3 ШИМ упр.",   "%",    "%");
 
     //rele_channels
 
-    dcts_rele_channel_init(FAN_IN, "Fan IN", "Вентилятор приточный");
-    dcts_rele_channel_init(HEATER, "Heater", "Нагреватель");
-    dcts_rele_channel_init(FREEZER, "Freezer", "Охладитель");
-    dcts_rele_channel_init(FAN_CONVECTION, "Convection", "Конвекция");
-    dcts_rele_channel_init(WTR_PUMP, "Water pump", "Дренаж");
-    dcts_rele_channel_init(RESERV, "Reserv", "Резерв");
+    dcts_rele_channel_init(CH_0_OUT, "CH_0 Out", "Кан_0 Выход");
+    dcts_rele_channel_init(CH_1_OUT, "CH_1 Out", "Кан_0 Выход");
+    dcts_rele_channel_init(CH_2_OUT, "CH_2 Out", "Кан_0 Выход");
+    dcts_rele_channel_init(CH_3_OUT, "CH_3 Out", "Кан_0 Выход");
 }
 
 /**
@@ -558,7 +548,7 @@ void rtc_task(void const * argument){
 #elif(DISP == ST7735_DISP)
 #define display_task_period 250
 #endif // DISP
-void display_task(void const * argument){
+/*void display_task(void const * argument){
     (void)argument;
     menu_init();
 #if(DISP == LCD_DISP)
@@ -626,8 +616,8 @@ void display_task(void const * argument){
         tick_2++;
         osDelayUntil(&last_wake_time, display_task_period);
     }
-}
-
+}*/
+/*
 #define BUTTON_PRESS_TIME 1000
 #define BUTTON_PRESS_TIMEOUT 10000
 #define BUTTON_CLICK_TIME 10
@@ -829,22 +819,22 @@ void navigation_task (void const * argument){
             save_params();
         }
 
-        /*if((pressed_time[BUTTON_BREAK].pressed > 0)&&(pressed_time[BUTTON_BREAK].pressed < navigation_task_period)){
+        if((pressed_time[BUTTON_BREAK].pressed > 0)&&(pressed_time[BUTTON_BREAK].pressed < navigation_task_period)){
             if(LCD.auto_off == 0){
                 LCD_backlight_toggle();
             }
         }
         if((pressed_time[BUTTON_SET].pressed > 0)&&(pressed_time[BUTTON_SET].pressed < navigation_task_period)){
             save_params();
-        }*/
+        }
         osDelayUntil(&last_wake_time, navigation_task_period);
     }
-}
+}*/
 
 static void error_page_print(menu_page_t page){
     char string[50];
 #if(DISP == LCD_DISP)
-    LCD_set_xy(25,45);
+    /*LCD_set_xy(25,45);
     sprintf(string, "СТРАНИЦА НЕ");
     LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     LCD_set_xy(25,35);
@@ -854,7 +844,7 @@ static void error_page_print(menu_page_t page){
     sprintf(string, "<назад");
     LCD_set_xy(0,0);
     LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    LCD_invert_area(0,0,42,11);
+    LCD_invert_area(0,0,42,11);*/
 #elif(DISP == ST7735_DISP)
     st7735_xy(25,45);
     sprintf(string, "СТРАНИЦА НЕ");
@@ -876,7 +866,7 @@ static void main_page_print(u8 tick){
     // temperature and hummidity indoor
 #if(DISP == LCD_DISP)
     sprintf(string,"Кабинет");
-    LCD_set_xy(align_text_center(string,Font_7x10),40);
+    /*LCD_set_xy(align_text_center(string,Font_7x10),40);
     LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     LCD_invert_area(0,29,127,51);
     LCD_invert_area(1,30,126,41);
@@ -886,7 +876,7 @@ static void main_page_print(u8 tick){
         sprintf(string,"Обрыв датчика");
     }
     LCD_set_xy(align_text_center(string,Font_7x10),30);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);*/
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(0,111,36,17,ST7735_WHITE);
     st7735_xy(0,119);
@@ -910,7 +900,7 @@ static void main_page_print(u8 tick){
     //temperature and hummidity outdoor
 #if(DISP == LCD_DISP)
     sprintf(string,"Улица");
-    LCD_set_xy(align_text_center(string,Font_7x10),12);
+    /*LCD_set_xy(align_text_center(string,Font_7x10),12);
     LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
     LCD_invert_area(0,1,127,23);
     LCD_invert_area(1,2,126,13);
@@ -920,7 +910,7 @@ static void main_page_print(u8 tick){
         sprintf(string,"Обрыв датчика");
     }
     LCD_set_xy(align_text_center(string,Font_7x10),2);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);*/
     /*
     if(dcts_meas[TMPR_IN_AVG].valid == 1){
         if((dcts_act[TMPR_IN_HEATING].state.control == 1)||(dcts_act[TMPR_IN_COOLING].state.control == 1)){
@@ -987,8 +977,8 @@ static void main_page_print(u8 tick){
     //time
 #if(DISP == LCD_DISP)
     sprintf(string,"%02d:%02d:%02d",dcts.dcts_rtc.hour,dcts.dcts_rtc.minute,dcts.dcts_rtc.second);
-    LCD_set_xy(align_text_center(string,Font_5x7),55);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    /*LCD_set_xy(align_text_center(string,Font_5x7),55);
+    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);*/
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(16,45,129,27,ST7735_WHITE);
     sprintf(string,"%02d:%02d:%02d",dcts.dcts_rtc.hour,dcts.dcts_rtc.minute,dcts.dcts_rtc.second);
@@ -1003,9 +993,9 @@ static void print_header(void){
 #if(DISP == LCD_DISP)
     menuItem* temp = selectedMenuItem->Parent;
     sprintf(string, temp->Text);
-    LCD_set_xy(align_text_center(string, Font_7x10),52);
+    /*LCD_set_xy(align_text_center(string, Font_7x10),52);
     LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    LCD_invert_area(0,53,127,63);
+    LCD_invert_area(0,53,127,63);*/
 #elif(DISP == ST7735_DISP)
     menuItem* temp = selectedMenuItem->Parent;
     sprintf(string, temp->Text);
@@ -1021,7 +1011,7 @@ static void menu_page_print(u8 tick){
 
     menuItem* temp = selectedMenuItem->Parent;
 #if(DISP == LCD_DISP)
-    if(temp->Child_num >= 3){
+    /*if(temp->Child_num >= 3){
         //print previous
         temp = selectedMenuItem->Previous;
         sprintf(string, temp->Text);
@@ -1040,7 +1030,7 @@ static void menu_page_print(u8 tick){
     temp = selectedMenuItem->Next;
     sprintf(string, temp->Text);
     LCD_set_xy(align_text_center(string, Font_7x10),14);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);*/
 #elif(DISP == ST7735_DISP)
     uint8_t line_pointer = 0;
 
@@ -1073,7 +1063,7 @@ static void value_print(u8 tick){
 
     menuItem* temp = selectedMenuItem->Parent;
 #if(DISP == LCD_DISP)
-    if(temp->Child_num >= 3){
+    /*if(temp->Child_num >= 3){
         //print previous name
         temp = selectedMenuItem->Previous;
         sprintf(string, temp->Text);
@@ -1116,7 +1106,7 @@ static void value_print(u8 tick){
     if(next == -2){
         // invalid value
         LCD_fill_area(84,20,127,20,LCD_COLOR_BLACK);
-    }
+    }*/
 #elif(DISP == ST7735_DISP)
     uint8_t line_pointer = 0;
 
@@ -1165,11 +1155,11 @@ static void value_print(u8 tick){
     }else if(navigation_style == DIGIT_EDIT){
         print_enter_ok();
 #if(DISP == LCD_DISP)
-        if(edit_val.digit < 0){
+        /*if(edit_val.digit < 0){
             LCD_invert_area(127-(u8)(edit_val.digit+edit_val.select_shift)*edit_val.select_width,26,127-(u8)(edit_val.digit+edit_val.select_shift-1)*edit_val.select_width,38);
         }else{
             LCD_invert_area(127-(u8)(edit_val.digit+edit_val.select_shift+1)*edit_val.select_width,26,127-(u8)(edit_val.digit+edit_val.select_shift)*edit_val.select_width,38);
-        }
+        }*/
 #elif(DISP == ST7735_DISP)
         if(edit_val.digit < 0){
             st7735_fill_rect(159-(u8)(edit_val.digit+edit_val.select_shift)*edit_val.select_width,102,edit_val.select_width,1,ST7735_BLACK);
@@ -1253,10 +1243,10 @@ static int get_param_value(char* string, menu_page_t page){
         break;
 
     case WTR_MIN_REF:
-        sprintf(string, "%.1f", (double)config.params.wtr_min_ref);
+        //sprintf(string, "%.1f", (double)config.params.wtr_min_ref);
         break;
     case WTR_MAX_REF:
-        sprintf(string, "%.1f", (double)config.params.wtr_max_ref);
+        //sprintf(string, "%.1f", (double)config.params.wtr_max_ref);
         break;
 
     case RELE_AUTO_MAN_0:
@@ -1306,12 +1296,12 @@ static int get_param_value(char* string, menu_page_t page){
         break;
 
     case LIGHT_LVL:
-        sprintf(string, "%d%%", LCD.backlight_lvl*10);
+        /*sprintf(string, "%d%%", LCD.backlight_lvl*10);
         LCD_backlight_timer_init();
-        LCD_backlight_on();
+        LCD_backlight_on();*/
         break;
     case AUTO_OFF:
-        sprintf(string, "%dс", LCD.auto_off*10);
+        //sprintf(string, "%dс", LCD.auto_off*10);
         break;
 
     case TIME_HOUR:
@@ -1338,7 +1328,7 @@ static int get_param_value(char* string, menu_page_t page){
 
 static void set_edit_value(menu_page_t page){
     switch(page){
-    case ACT_EN_0:
+    /*case ACT_EN_0:
         edit_val.type = VAL_UINT8;
         edit_val.digit_max = 0;
         edit_val.digit_min = 0;
@@ -1811,7 +1801,7 @@ static void set_edit_value(menu_page_t page){
         edit_val.p_val.p_uint16 = &dcts.dcts_rtc.year;
         edit_val.select_shift = 0;
         edit_val.select_width = Font_7x10.FontWidth;
-        break;
+        break;*/
     }
 }
 
@@ -1820,7 +1810,7 @@ static void info_print (void){
     char string[50];
     print_header();
 #if(DISP == LCD_DISP)
-    sprintf(string, "Имя:%s",dcts.dcts_name_cyr);
+    /*sprintf(string, "Имя:%s",dcts.dcts_name_cyr);
     LCD_set_xy(2,44);
     LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
     sprintf(string, "Адрес:%d",dcts.dcts_address);
@@ -1840,7 +1830,7 @@ static void info_print (void){
     LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
     sprintf(string, "%02d.%02d.%04d", dcts.dcts_rtc.day, dcts.dcts_rtc.month, dcts.dcts_rtc.year);
     LCD_set_xy(70,36);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
+    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);*/
 #elif(DISP == ST7735_DISP)
     sprintf(string, "Имя:%s",dcts.dcts_name_cyr);
     st7735_xy(2,44);
@@ -2213,7 +2203,7 @@ static void save_page_print (u8 tick){
     char string[50];
 
 #if(DISP == LCD_DISP)
-    LCD_fill_area(5,30,123,58,LCD_COLOR_BLACK);
+    /*LCD_fill_area(5,30,123,58,LCD_COLOR_BLACK);
     LCD_fill_area(6,31,122,57,LCD_COLOR_WHITE);
     sprintf(string, "СОХРАНЕНИЕ НОВЫХ");
     LCD_set_xy(align_text_center(string, Font_7x10),42);
@@ -2233,7 +2223,7 @@ static void save_page_print (u8 tick){
     case 2:
         LCD_fill_area(55,18,71,22,LCD_COLOR_WHITE);
         break;
-    }
+    }*/
 #elif(DISP == ST7735_DISP)
     st7735_fill_rect(5,30,118,28,ST7735_BLACK);
     st7735_fill_rect(6,31,116,26,ST7735_WHITE);
@@ -2285,7 +2275,7 @@ void am2302_task (void const * argument){
     while(1){
         ch_2 = am2302_get(0);
         taskENTER_CRITICAL();
-        if(ch_2.error == 1){
+        /*if(ch_2.error == 1){
             ch_2_lost++;
             ch_2_lost_con_cnt++;
             if(ch_2_lost_con_cnt > 2){
@@ -2299,12 +2289,12 @@ void am2302_task (void const * argument){
             dcts_meas[HUM_OUT].valid = TRUE;
             dcts_meas[TMPR_OUT].value = (float)ch_2.tmpr/10;
             dcts_meas[TMPR_OUT].valid = TRUE;
-        }
+        }*/
         taskEXIT_CRITICAL();
 
         ch_3 = am2302_get(1);
         taskENTER_CRITICAL();
-        if(ch_3.error == 1){
+        /*if(ch_3.error == 1){
             ch_3_lost++;
             ch_3_lost_con_cnt++;
             if(ch_3_lost_con_cnt > 2){
@@ -2318,12 +2308,12 @@ void am2302_task (void const * argument){
             dcts_meas[HUM_IN_1].valid = TRUE;
             dcts_meas[TMPR_IN_1].value = (float)ch_3.tmpr/10;
             dcts_meas[TMPR_IN_1].valid = TRUE;
-        }
+        }*/
         taskEXIT_CRITICAL();
 
         ch_4 = am2302_get(2);
         taskENTER_CRITICAL();
-        if(ch_4.error == 1){
+        /*if(ch_4.error == 1){
             ch_4_lost++;
             ch_4_lost_con_cnt++;
             if(ch_4_lost_con_cnt > 2){
@@ -2337,10 +2327,10 @@ void am2302_task (void const * argument){
             dcts_meas[HUM_IN_2].valid = TRUE;
             dcts_meas[TMPR_IN_2].value = (float)ch_4.tmpr/10;
             dcts_meas[TMPR_IN_2].valid = TRUE;
-        }
+        }*/
         taskEXIT_CRITICAL();
 
-        if((dcts_meas[HUM_IN_1].valid)&&(dcts_meas[HUM_IN_2].valid)){
+        /*if((dcts_meas[HUM_IN_1].valid)&&(dcts_meas[HUM_IN_2].valid)){
             dcts_meas[HUM_IN_AVG].value = (dcts_meas[HUM_IN_1].value + dcts_meas[HUM_IN_2].value)/2.0f;
             dcts_meas[TMPR_IN_AVG].value = (dcts_meas[TMPR_IN_1].value + dcts_meas[TMPR_IN_2].value)/2.0f;
             dcts_meas[HUM_IN_AVG].valid = TRUE;
@@ -2358,7 +2348,7 @@ void am2302_task (void const * argument){
         }else{
             dcts_meas[HUM_IN_AVG].valid = FALSE;
             dcts_meas[TMPR_IN_AVG].valid = FALSE;
-        }
+        }*/
 
         osDelayUntil(&last_wake_time, am2302_task_period);
     }
@@ -2421,7 +2411,7 @@ void uart_task(void const * argument){
 }
 
 #define control_task_period 5
-void control_task(void const * argument){
+/*void control_task(void const * argument){
     (void)argument;
     GPIO_InitTypeDef GPIO_InitStruct;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -2588,7 +2578,7 @@ void control_task(void const * argument){
         }
         osDelayUntil(&last_wake_time, control_task_period);
     }
-}
+}*/
 
 /**
  * @brief Init timer for LCD backlight level control
@@ -2782,9 +2772,9 @@ static void print_back(void){
     char string[100];
 #if(DISP == LCD_DISP)
     sprintf(string, "<назад");
-    LCD_set_xy(0,0);
+    /*LCD_set_xy(0,0);
     LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
-    LCD_invert_area(0,0,30,8);
+    LCD_invert_area(0,0,30,8);*/
 #elif(DISP == ST7735_DISP)
     sprintf(string, "<назад");
     st7735_fill_rect(0,0,32,9,ST7735_BLACK);
@@ -2797,9 +2787,9 @@ static void print_enter_right(void){
     char string[100];
 #if(DISP == LCD_DISP)
     sprintf(string, "выбор>");
-    LCD_set_xy(align_text_right(string,Font_5x7),0);
+    /*LCD_set_xy(align_text_right(string,Font_5x7),0);
     LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
-    LCD_invert_area(97,0,127,8);
+    LCD_invert_area(97,0,127,8);*/
 #elif(DISP == ST7735_DISP)
     sprintf(string, "выбор>");
     st7735_fill_rect(128,0,32,9,ST7735_BLACK);
@@ -2812,9 +2802,9 @@ static void print_enter_ok(void){
     char string[100];
 #if(DISP == LCD_DISP)
     sprintf(string, "ввод*");
-    LCD_set_xy(align_text_center(string,Font_5x7),0);
+    /*LCD_set_xy(align_text_center(string,Font_5x7),0);
     LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
-    LCD_invert_area(51,0,76,8);
+    LCD_invert_area(51,0,76,8);*/
 #elif(DISP == ST7735_DISP)
     sprintf(string, "ввод*");
     st7735_fill_rect(66,0,27,9,ST7735_BLACK);
@@ -2827,9 +2817,9 @@ static void print_change(void){
     char string[100];
 #if(DISP == LCD_DISP)
     sprintf(string, "изменить>");
-    LCD_set_xy(align_text_right(string,Font_5x7),0);
+    /*LCD_set_xy(align_text_right(string,Font_5x7),0);
     LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
-    LCD_invert_area(82,0,127,8);
+    LCD_invert_area(82,0,127,8);*/
 #elif(DISP == ST7735_DISP)
     sprintf(string, "изменить>");
     st7735_fill_rect(113,0,47,9,ST7735_BLACK);
@@ -2847,8 +2837,8 @@ static void save_params(void){
     config.params.mdb_address = dcts.dcts_address;
     config.params.mdb_bitrate = (uint16_t)bitrate_array[bitrate_array_pointer];
     // store display params
-    config.params.lcd_backlight_lvl = LCD.backlight_lvl;
-    config.params.lcd_backlight_time = LCD.auto_off;
+    /*config.params.lcd_backlight_lvl = LCD.backlight_lvl;
+    config.params.lcd_backlight_time = LCD.auto_off;*/
     // store dcts_act
     for(uint8_t i = 0; i < ACT_NUM; i++){
         config.params.act_set[i] = dcts_act[i].set_value;
@@ -3102,7 +3092,7 @@ static void MX_IWDG_Init(void){
     }
 }
 
-uint32_t uint32_pow(uint16_t x, uint8_t pow){
+/*uint32_t uint32_pow(uint16_t x, uint8_t pow){
     uint32_t result = 1;
     while(pow){
         result *= x;
@@ -3125,7 +3115,7 @@ float float_pow(float x, int pow){
         }
     }
     return  result;
-}
+}*/
 
 void refresh_watchdog(void){
 #if(RELEASE == 1)

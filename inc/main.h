@@ -59,7 +59,7 @@
 #include "flash.h"
 
 
-#define AIR_PORT GPIOA
+/*#define AIR_PORT GPIOA
 #define AIR_PIN  LL_GPIO_PIN_7
 #define FLOW_PORT GPIOA
 #define FLOW_PIN  LL_GPIO_PIN_5
@@ -80,12 +80,13 @@
 #define STEP_OUT1_2 LL_GPIO_PIN_14
 #define STEP_OUT2_1 LL_GPIO_PIN_11
 #define STEP_OUT2_2 LL_GPIO_PIN_12
-#define STEP_PORT GPIOB
+#define STEP_PORT GPIOB*/
 
-#define MEAS_NUM 16
-#define ACT_NUM 6
-#define RELE_NUM 6
-#define ARRAY_NUM 2
+#define CH_NUM 4
+#define MEAS_NUM 24
+#define ACT_NUM 8
+#define RELE_NUM 4
+#define ARRAY_NUM 0
 #define SAVED_PARAMS_SIZE 44
 #if(STM32F103xB == 1)
 #define BKP_REG_NUM 10
@@ -119,68 +120,54 @@
 #endif
 
  typedef enum {
-     TMPR_IN_1 = 0,
-     TMPR_IN_2,
-     TMPR_IN_AVG,
-     HUM_IN_1,
-     HUM_IN_2,
-     HUM_IN_AVG,
-     TMPR_OUT,
-     HUM_OUT,
-     WTR_MIN_RES,
-     WTR_MIN_ADC,
-     WTR_MIN_VLT,
-     WTR_MAX_RES,
-     WTR_MAX_ADC,
-     WTR_MAX_VLT,
+     TMPR_SELF = 0,
+     HUM_SELF,
+     CH_0_TMPR,
+     CH_0_HUM,
+     CH_0_ADC,
+     CH_0_VLT,
+     CH_0_CNT,
+     CH_1_TMPR,
+     CH_1_HUM,
+     CH_1_ADC,
+     CH_1_VLT,
+     CH_1_CNT,
+     CH_2_TMPR,
+     CH_2_HUM,
+     CH_2_ADC,
+     CH_2_VLT,
+     CH_2_CNT,
+     CH_3_TMPR,
+     CH_3_HUM,
+     CH_3_ADC,
+     CH_3_VLT,
+     CH_3_CNT,
      VREF_VLT,
      VBAT_VLT,
  }dcts_meas_t;
 
  typedef enum {
-     VALVE_IN = 0,
-     VALVE_OUT,
-     TMPR_IN_HEATING,
-     TMPR_IN_COOLING,
-     HUM_IN,
-     AUTO_PUMP,
-     WTR_MIN_LVL,
-     WTR_MAX_LVL,
+     CH_0_DSCR_CTRL = 0,
+     CH_0_PWM_CTRL,
+     CH_1_DSCR_CTRL,
+     CH_1_PWM_CTRL,
+     CH_2_DSCR_CTRL,
+     CH_2_PWM_CTRL,
+     CH_3_DSCR_CTRL,
+     CH_3_PWM_CTRL,
  }dcts_act_t;
 
  typedef enum {
-     FAN_IN = 0,
-     HEATER,
-     FREEZER,
-     FAN_CONVECTION,
-     WTR_PUMP,
-     RESERV,
+     CH_0_OUT = 0,
+     CH_1_OUT,
+     CH_2_OUT,
+     CH_3_OUT,
  }dcts_rele_t;
 
 typedef enum{
     MENU_NAVIGATION,
     DIGIT_EDIT,
 }navigation_t;
-
-typedef enum{
-    CH_VALVE_IN = 0,
-    CH_VALVE_OUT,
-    CH_AM2302_OUT,
-    CH_AM2302_IN_1,
-    CH_AM2302_IN_2,
-    CH_VALVE_IN_PWM,
-    CH_VALVE_OUT_PWM,
-    CH_RESERVED,
-}ch_list;
-
-typedef enum{
-    DO_FAN_IN = 0,
-    DO_HEATER,
-    DO_FREEZER,
-    DO_FAN_CONVECTION,
-    DO_WTR_PUMP,
-    DO_RESERVED,
-}do_list;
 
  typedef enum{
      VAL_UNKNOWN = 0,
@@ -234,8 +221,6 @@ typedef union{
         uint16_t act_enable[ACT_NUM];
         float    act_set[ACT_NUM];
         float    act_hyst[ACT_NUM];
-        float    wtr_min_ref;
-        float    wtr_max_ref;
         uint16_t rele[RELE_NUM];
     }params;
     uint16_t word[SAVED_PARAMS_SIZE];
@@ -261,16 +246,6 @@ typedef enum{
     PUMP_FILLING,
     PUMP_ACTIVE,
 }pump_st_t;
-
-typedef enum{
-    T_HEAT_HEATING = 0,
-    T_HEAT_COOLING,
-}t_heat_t;
-
- typedef enum{
-     T_COOL_COOLING = 0,
-     T_COOL_HEATING,
- }t_cool_t;
 
 typedef struct{
     ch_mode_t mode;

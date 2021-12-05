@@ -267,7 +267,7 @@ void USART1_IRQHandler(void)
 }
 
 void SPI1_IRQHandler(void){
-    HAL_SPI_IRQHandler(&st7735_spi);
+    //HAL_SPI_IRQHandler(&st7735_spi);
     //st7735_spi_handler();
 }
 

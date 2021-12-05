@@ -35,14 +35,20 @@
 /* Includes ------------------------------------------------------------------*/
 #include "i2c.h"
 #include "main.h"
+#include "pin_map.h"
 #include "stm32f1xx_ll_gpio.h"
+
+#define I2C1_SDA        DISP_SDA_PIN
+#define I2C1_SCL        DISP_SCL_PIN
+#define I2C1_SDA_PORT   DISP_SDA_PORT
+#define I2C1_SCL_PORT   DISP_SCL_PORT
 
 I2C_HandleTypeDef hi2c1;
 
 /* I2C1 init function */
 void MX_I2C1_Init(void)
 {
-    hi2c1.Instance = I2C1;
+    hi2c1.Instance = I2C2;
     hi2c1.Init.ClockSpeed = 400000;
     hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
     hi2c1.Init.OwnAddress1 = 0;

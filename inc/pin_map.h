@@ -54,10 +54,10 @@
 #define CAN_TX_PIN      GPIO_PIN_8
 #define CAN_RX_PORT     GPIOB
 #define CAN_RX_PIN      GPIO_PIN_9
-#define SDA_PORT        GPIOB
-#define SDA_PIN         GPIO_PIN_10
-#define SCL_PORT        GPIOB
-#define SCL_PIN         GPIO_PIN_11
+#define DISP_SDA_PORT        GPIOB
+#define DISP_SDA_PIN         GPIO_PIN_10
+#define DISP_SCL_PORT        GPIOB
+#define DISP_SCL_PIN         GPIO_PIN_11
 #define AM2302_PORT     GPIOB
 #define AM2302_PIN      GPIO_PIN_12
 

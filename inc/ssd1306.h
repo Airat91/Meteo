@@ -83,6 +83,8 @@ typedef enum {
         uint8_t Inverted;
         uint8_t Initialized;
         uint16_t error_num;
+        uint32_t auto_off_timeout;
+        uint8_t on_off;
     } SSD1306_t;
 
 extern SSD1306_t SSD1306;
@@ -194,6 +196,9 @@ void SSD1306_DrawRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, SSD13
  */
 void SSD1306_DrawFilledRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, SSD1306_COLOR_t c);
 
+
+void SSD1306_InvertRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+
 /**
  * @brief  Draws triangle on LCD
  * @note   @ref SSD1306_UpdateScreen() must be called after that in order to see updated LCD screen
@@ -268,6 +273,11 @@ void ssd1306_I2C_WriteMulti(uint8_t address, uint8_t reg, uint8_t *data, uint16_
 
 uint8_t ssf1306_init_sequence(void);
 
+int SSD1306_print_ticker(char* string, FontDef_t* font, SSD1306_COLOR_t color, uint8_t char_len, uint8_t tick);
+
+void SSD1306_ON(void);
+void SSD1306_OFF(void);
+void SSD1306_SET_LIGHTLEVEL(uint8_t lvl);
 /* C++ detection */
 #ifdef __cplusplus
 }

@@ -175,7 +175,7 @@ void adc_task(void const * argument){
         taskENTER_CRITICAL();
         dcts.dcts_pwr = temp/ADC_MAX*ADC_VREF*PWR_K;
 
-        dcts_meas[WTR_MIN_ADC].value = (float)wtr_min_sum/WTR_LVL_BUF_SIZE;
+        /*dcts_meas[WTR_MIN_ADC].value = (float)wtr_min_sum/WTR_LVL_BUF_SIZE;
         dcts_meas[WTR_MIN_VLT].value = dcts_meas[WTR_MIN_ADC].value*v_3_3/ADC_MAX;
         dcts_meas[WTR_MIN_RES].value = dcts_meas[WTR_MIN_VLT].value*INPUT_RES/(v_3_3 -  dcts_meas[WTR_MIN_VLT].value);
 
@@ -190,7 +190,7 @@ void adc_task(void const * argument){
         dcts_meas[WTR_MIN_RES].valid = TRUE;
         dcts_meas[WTR_MAX_ADC].valid = TRUE;
         dcts_meas[WTR_MAX_VLT].valid = TRUE;
-        dcts_meas[WTR_MAX_RES].valid = TRUE;
+        dcts_meas[WTR_MAX_RES].valid = TRUE;*/
         dcts_meas[VREF_VLT].valid = TRUE;
         taskEXIT_CRITICAL();
 

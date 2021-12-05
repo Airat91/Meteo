@@ -38,36 +38,69 @@
  * Author: Shoma Gane <shomagan@gmail.com>
  *         Ayrat Girfanov <girfanov.ayrat@yandex.ru>
  */
-#ifndef DISPLAY_H
-#define DISPLAY_H 1
+#ifndef CONTROL_H
+#define CONTROL_H 1
  
 /*add includes below */
 #include "type_def.h"
 #include "stm32f1xx_hal.h"
-#include "fonts.h"
 /*add includes before */
 #ifdef __cplusplus 
    extern "C" {
 #endif
 /*add functions and variable declarations below */
+extern TIM_HandleTypeDef htim3;
+extern uint8_t PWM_duty;
+void control_task( const void *parameters);
+#define MAX_PWM_VALUE 32768
+#define CONTROL_TASK_PERIOD 100
+#define MAX_REG_TEMP 100.0f
+#define MAX_SET_TEMP 40.0f
+#define MIN_SET_TEMP 5.0f
+#define HYSTERESIS 1.0f
+#define TEMP_MAX_BUFF_SIZE  32
+#define DISPERSION  1.0f
+#define SENSOR_MIN_VOLTAGE  0.01f
+#define SENSOR_MAX_VOLTAGE  3.0f
+#define MAX_CORRECTION  10.0f
+#define MIN_CORRECTION  -10.0f
 
 typedef enum{
-   SKIN_FULL = 0,
-   SKIN_TIME,
-   SKIN_TEMP,
-}skin_t;
-extern const char skin_descr[][20];
-
-void display_task( const void *parameters);
-void navigation_task( const void *parameters);
-uint8_t align_text_center(char* string, FontDef_t font);
-uint8_t align_text_right(char* string, FontDef_t font);
-uint32_t uint32_pow(uint16_t x, uint8_t pow);
-float float_pow(float x, int pow);
-void restore_params(void);
-#define DISPLAY_TASK_PERIOD 500
+    SENSOR_OK = 0,
+    SENSOR_BREAK,
+    SENSOR_SHORT,
+}sensor_err;
+typedef struct{
+    u8 error;
+    u8 buff_size;
+    float hysteresis;
+    float dispersion;
+    float correction;
+}sensor_tt;
+typedef enum {
+    SENSOR_NTC_10K,
+    SENSOR_DS18B20,
+    SENSOR_LM35,
+}sensor_t;
+typedef enum {
+    CTRL_RULE_PWM,
+    CTRL_RULE_TMPR,
+}ctrl_rule_t;
+typedef enum {
+    TMPR_HEATING,
+    TMPR_COOLING,
+}tmpr_proc_t;
+extern const char sensor_descr[][20];
+extern const char ctrl_rule_descr[][20];
+extern sensor_tt sensor_state;
+typedef struct{
+    u8 overheat;
+    u16 overheat_cnt;
+    float max_tmpr;
+}semistor_t;
+extern semistor_t semistor_state;
 /*add functions and variable declarations before */
 #ifdef __cplusplus
 }
 #endif
-#endif //DISPLAY_H
+#endif //CONTROL_H
