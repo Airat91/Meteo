@@ -168,9 +168,9 @@ void display_task( const void *parameters){
         if(SSD1306.on_off == 1){
             SSD1306_UpdateScreen();
         }
-        if(SSD1306.on_off == 1){
+        if((config.params.lcd_backlight_time != 0)&&(SSD1306.on_off == 1)){
             SSD1306.auto_off_timeout += display_task_period;
-            if(SSD1306.auto_off_timeout > 10000){
+            if(SSD1306.auto_off_timeout > (uint32_t)config.params.lcd_backlight_time * 10000){
                 SSD1306.auto_off_timeout = 0;
                 SSD1306.on_off = 0;
                 SSD1306_Fill(SSD1306_COLOR_BLACK);
