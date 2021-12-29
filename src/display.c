@@ -120,7 +120,7 @@ void display_task( const void *parameters){
     (void) parameters;
     menu_init();
     skin_t skin = SKIN_FULL; // add from config
-    u8 tick=0;
+    u8 tick = 0;
     u8 tick_2 = 0;
     menu_page_t last_page = selectedMenuItem->Page;
     uint32_t last_wake_time = osKernelSysTick();
@@ -190,6 +190,13 @@ static void main_page_print(u8 tick, skin_t skin){
     char buff[50];
     switch (skin) {
     case SKIN_FULL:
+        SSD1306_DrawFilledRectangle(0,14,64,26,SSD1306_COLOR_BLACK);    // clear area
+        sprintf(buff,"ÝÊÐÀÍ");
+        SSD1306_GotoXY(15, 15);
+        SSD1306_Puts(buff, &Font_7x10, SSD1306_COLOR_WHITE);
+        sprintf(buff,"ÏÐÈÂÅÒÑÒÂÈß");
+        SSD1306_GotoXY(7, 29);
+        SSD1306_Puts(buff, &Font_7x10, SSD1306_COLOR_WHITE);
         /*if(sensor_state.error == SENSOR_OK){
             sprintf(buff,"%2.1f", (double)dcts_act[HEATING].meas_value);
            SSD1306_GotoXY(0, 14);
@@ -227,7 +234,7 @@ static void main_page_print(u8 tick, skin_t skin){
         display_time(0);*/
         break;
     case SKIN_TIME:
-        if(sensor_state.error == SENSOR_OK){
+        /*if(sensor_state.error == SENSOR_OK){
             sprintf(buff,"%2.1f", (double)dcts_act[0].meas_value);
             SSD1306_GotoXY(0, 14);
             SSD1306_Puts(buff, &Font_16x26, SSD1306_COLOR_WHITE);
@@ -249,16 +256,16 @@ static void main_page_print(u8 tick, skin_t skin){
             SSD1306_Puts(buff, &Font_7x10, SSD1306_COLOR_WHITE);
         }
 
-        /*if(dcts_act[HEATER].state.control == TRUE){
+        if(dcts_act[HEATER].state.control == TRUE){
             sprintf(buff,"Óñò %2.0f%s", (double)dcts_act[0].set_value, dcts_act[0].unit);
         }else {
             sprintf(buff,"Âûêëþ÷åí");
-        }*/
+        }
         SSD1306_GotoXY(70, 16);
-        SSD1306_Puts(buff, &Font_7x10, SSD1306_COLOR_WHITE);
+        SSD1306_Puts(buff, &Font_7x10, SSD1306_COLOR_WHITE);*/
         break;
     case SKIN_TEMP:
-        if(sensor_state.error == SENSOR_OK){
+        /*if(sensor_state.error == SENSOR_OK){
             sprintf(buff,"%2.1f", (double)dcts_act[0].meas_value);
             SSD1306_GotoXY(0, 14);
             SSD1306_Puts(buff, &Font_16x26, SSD1306_COLOR_WHITE);
@@ -280,15 +287,15 @@ static void main_page_print(u8 tick, skin_t skin){
             SSD1306_Puts(buff, &Font_7x10, SSD1306_COLOR_WHITE);
         }
 
-        /*if(dcts_act[HEATER].state.control == TRUE){
+        if(dcts_act[HEATER].state.control == TRUE){
             sprintf(buff,"Óñò %2.0f%s", (double)dcts_act[0].set_value, dcts_act[0].unit);
         }else {
             sprintf(buff,"Âûêëþ÷åí");
-        }*/
+        }
         SSD1306_GotoXY(70, 16);
         SSD1306_Puts(buff, &Font_7x10, SSD1306_COLOR_WHITE);
 
-        display_time(0);
+        display_time(0);*/
         break;
     default:
         break;

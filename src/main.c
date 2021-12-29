@@ -80,7 +80,7 @@
 
 #define RTC_HAL     1
 #define RTC_UNIX    2
-#define RTC_TIME    RTC_UNIX //(RTC_HAL or RTC_UNIX)
+#define RTC_TIME    RTC_HAL //(RTC_HAL or RTC_UNIX)
 
 #define LCD_DISP 1
 #define ST7735_DISP 2
