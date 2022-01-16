@@ -30,7 +30,7 @@
 #define ABS(x)   ((x) > 0 ? (x) : -(x))
 
 /* SSD1306 data buffer */
-static uint8_t SSD1306_Buffer[SSD1306_WIDTH * SSD1306_HEIGHT / 8];
+uint8_t SSD1306_Buffer[SSD1306_WIDTH * SSD1306_HEIGHT / 8];
 
 
 

@@ -88,6 +88,7 @@ typedef enum {
     } SSD1306_t;
 
 extern SSD1306_t SSD1306;
+extern uint8_t SSD1306_Buffer[];
 
 /**
  * @brief  Initializes SSD1306 LCD

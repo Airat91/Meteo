@@ -44,14 +44,15 @@
 /*add includes below */
 #include "type_def.h"
 #include "stm32f1xx_hal.h"
+#include "main.h"
 /*add includes before */
 #ifdef __cplusplus 
    extern "C" {
 #endif
 /*add functions and variable declarations below */
-extern TIM_HandleTypeDef htim3;
+//extern TIM_HandleTypeDef htim3;
 extern uint8_t PWM_duty;
-void control_task( const void *parameters);
+//void control_task( const void *parameters);
 #define MAX_PWM_VALUE 32768
 #define CONTROL_TASK_PERIOD 100
 #define MAX_REG_TEMP 100.0f
@@ -99,6 +100,9 @@ typedef struct{
     float max_tmpr;
 }semistor_t;
 extern semistor_t semistor_state;
+
+
+int init_channel(u8 ch, ch_mode_t mode);
 /*add functions and variable declarations before */
 #ifdef __cplusplus
 }

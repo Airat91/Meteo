@@ -58,6 +58,19 @@ typedef enum{
 }skin_t;
 extern const char skin_descr[][20];
 
+typedef struct {
+    u8 x0;
+    u8 y0;
+    u8 x1;
+    u8 y1;
+}brick_t;
+
+typedef enum {
+    BRICK_NONE = 0,
+    BRICK_FILL,
+    BRICK_EMPTY,
+}brick_state_t;
+
 void display_task( const void *parameters);
 void navigation_task( const void *parameters);
 uint8_t align_text_center(char* string, FontDef_t font);
@@ -65,6 +78,7 @@ uint8_t align_text_right(char* string, FontDef_t font);
 uint32_t uint32_pow(uint16_t x, uint8_t pow);
 float float_pow(float x, int pow);
 void restore_params(void);
+int set_def_params(void);
 #define DISPLAY_TASK_PERIOD 500
 /*add functions and variable declarations before */
 #ifdef __cplusplus

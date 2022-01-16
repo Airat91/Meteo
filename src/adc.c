@@ -72,14 +72,14 @@ int adc_init (void){
         result = -2;
     }
     //Configure WTR_MIN Channel
-    sConfigInjected.InjectedChannel = input_ch[0].adc_channel;
+    sConfigInjected.InjectedChannel = ch_config[0].adc_channel;
     sConfigInjected.InjectedRank = ADC_INJECTED_RANK_2;
     if (HAL_ADCEx_InjectedConfigChannel(&hadc1, &sConfigInjected) != HAL_OK)
     {
         result = -3;
     }
     //Configure WTR_MAX Channel
-    sConfigInjected.InjectedChannel = input_ch[1].adc_channel;
+    sConfigInjected.InjectedChannel = ch_config[1].adc_channel;
     sConfigInjected.InjectedRank = ADC_INJECTED_RANK_3;
     if (HAL_ADCEx_InjectedConfigChannel(&hadc1, &sConfigInjected) != HAL_OK)
     {

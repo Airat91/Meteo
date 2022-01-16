@@ -68,6 +68,7 @@ static void print_header(void);
 static void main_page_print(u8 tick, skin_t skin);
 static void menu_page_print(u8 tick);
 static void value_print(u8 tick);
+static void screensaver(u8 tick);
 static void error_page_print(menu_page_t page);
 static void save_page_print (u8 tick);
 static void info_print (void);
@@ -78,6 +79,7 @@ static void print_change(void);
 static int get_param_value(char* string, menu_page_t page);
 static void set_edit_value(menu_page_t page);
 static void save_params(void);
+static brick_t get_brick_coord(u8 ind);
 static const char off_on_descr[2][10] = {
     "Выкл.",
     "Вкл.",
@@ -86,19 +88,29 @@ static const char manual_auto_descr[2][10] = {
     "Ручной",
     "Авто",
 };
-static const char weekday_descr[7][3] = {
-    "Вс",
+static const char weekday_descr[8][3] = {
+    "Ош",
     "Пн",
     "Вт",
     "Ср",
     "Чт",
     "Пт",
     "Сб",
+    "Вс",
 };
 const char skin_descr[3][20]={
     {"Полный"},
     {"Время"},
     {"Темпер"},
+};
+static const char ch_mode_descr[7][10] = {
+    "Неактивен",
+    "Аналоговый",
+    "Дис. вход",
+    "Дис. выход",
+    "AM2302",
+    "ШИМ-выход",
+    "DS18B20",
 };
 /*enum menu_page_t {
     PAGE_CLOCK,
@@ -190,14 +202,14 @@ static void main_page_print(u8 tick, skin_t skin){
     char buff[50];
     switch (skin) {
     case SKIN_FULL:
-        SSD1306_DrawFilledRectangle(0,14,64,26,SSD1306_COLOR_BLACK);    // clear area
-        sprintf(buff,"ЭКРАН");
+        screensaver(tick);
+        /*sprintf(buff,"ЭКРАН");
         SSD1306_GotoXY(15, 15);
         SSD1306_Puts(buff, &Font_7x10, SSD1306_COLOR_WHITE);
         sprintf(buff,"ПРИВЕТСТВИЯ");
         SSD1306_GotoXY(7, 29);
         SSD1306_Puts(buff, &Font_7x10, SSD1306_COLOR_WHITE);
-        /*if(sensor_state.error == SENSOR_OK){
+        if(sensor_state.error == SENSOR_OK){
             sprintf(buff,"%2.1f", (double)dcts_act[HEATING].meas_value);
            SSD1306_GotoXY(0, 14);
             SSD1306_Puts(buff, &Font_16x26, SSD1306_COLOR_WHITE);
@@ -301,12 +313,119 @@ static void main_page_print(u8 tick, skin_t skin){
         break;
     }
 }
+#define BRICK_WIDTH     12
+#define BRICK_HEIGTH    5
+#define BRICK_LINES     13
+#define BRICK_POS       11
+
+static const u8 snake_array[BRICK_POS*BRICK_LINES] = {
+    132,133,134,135,136,137,138,139,140,141,142,
+    131,130,129,128,127,126,125,124,123,122,121,
+    110,111,112,113,114,115,116,117,118,119,120,
+    109,108,107,106,105,104,103,102,101,100, 99,
+     88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98,
+     87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77,
+     66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76,
+     65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55,
+     44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54,
+     43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33,
+     22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+     21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11,
+      0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10
+};
+
+static void screensaver(u8 tick){
+    char buff[50];
+    static u8 brick_state[BRICK_POS*BRICK_LINES] = {0};
+    brick_t brick = {0};
+    static u8 int_tick = 0;
+    static u8 filling = BRICK_FILL;
+    static u8 filled = 0;
+    if(filling == BRICK_FILL){
+        brick_state[snake_array[int_tick]] = BRICK_FILL;
+        int_tick++;
+        if(int_tick == BRICK_POS*BRICK_LINES){
+            int_tick = 0;
+            filling = BRICK_EMPTY;
+        }
+    }else if(filling == BRICK_EMPTY){
+        brick_state[snake_array[int_tick]] = BRICK_EMPTY;
+        int_tick++;
+        if(int_tick == BRICK_POS*BRICK_LINES){
+            int_tick = 0;
+            filling = BRICK_FILL;
+        }
+    }
+    /*for(u8 i = 0; i < BRICK_POS*BRICK_LINES; i++){
+        if(rand()%2 == 0){
+            brick_state[i] = BRICK_FILL;
+        }else{
+            brick_state[i] = BRICK_EMPTY;
+        }
+    }*/
+    SSD1306_DrawFilledRectangle(0,0,127,63,SSD1306_COLOR_BLACK);    // clear area
+    sprintf(buff,"BRIC");
+    SSD1306_GotoXY(align_text_center(buff,Font_16x26), 1);
+    SSD1306_Puts(buff, &Font_16x26, SSD1306_COLOR_WHITE);
+    sprintf(buff,"QUADRO");
+    SSD1306_GotoXY(align_text_center(buff,Font_16x26), 30);
+    SSD1306_Puts(buff, &Font_16x26, SSD1306_COLOR_WHITE);
+    for(u8 i = 0; i < BRICK_POS*BRICK_LINES; i++){
+        brick = get_brick_coord(i);
+        switch (brick_state[i]) {
+        case BRICK_FILL:
+            SSD1306_DrawRectangle(brick.x0,brick.y0,brick.x1 - brick.x0,brick.y1 - brick.y0,SSD1306_COLOR_BLACK);
+            SSD1306_DrawFilledRectangle(brick.x0+1,brick.y0+1,brick.x1 - brick.x0-1,brick.y1 - brick.y0-1,SSD1306_COLOR_WHITE);
+            break;
+        case BRICK_EMPTY:
+            //SSD1306_DrawRectangle(brick.x0,brick.y0,brick.x1 - brick.x0,brick.y1 - brick.y0,SSD1306_COLOR_BLACK);
+            break;
+        }
+    }
+}
+
+static brick_t get_brick_coord(u8 ind){
+    brick_t brick = {0};
+    s16 x0,y0,x1,y1,line,pos,add;
+    add = 0;
+    line = ind/BRICK_POS;
+    pos = ind%BRICK_POS;
+
+    if(line%2 == 1){
+        add = 6;
+    }
+    x0 = pos * BRICK_WIDTH - add;
+    y0 = line * BRICK_HEIGTH;
+
+    if((line%2 == 1)&&(pos == BRICK_POS - 1)){
+        x1 = 127;
+    }else{
+        x1 = x0 + BRICK_WIDTH;
+    }
+    y1 = y0 + BRICK_HEIGTH;
+
+    if(x0 < 0){
+        x0 = 0;
+    }
+    if(x1 > 127){
+        x1 = 127;
+    }
+    if(y1 > 63){
+        y1 = 63;
+    }
+
+    brick.x0 = (u8)x0;
+    brick.x1 = (u8)x1;
+    brick.y0 = (u8)y0;
+    brick.y1 = (u8)y1;
+    return brick;
+}
 
 static void info_print (void){
     char string[50];
     print_header();
 
-    sprintf(string, "Имя:%s",dcts.dcts_name);
+    sprintf(string, "Имя:%s",dcts.dcts_name_cyr);
     SSD1306_GotoXY(2,13);
     SSD1306_Puts(string,&Font_5x7,SSD1306_COLOR_WHITE);
     sprintf(string, "Адрес:%d",dcts.dcts_address);
@@ -1012,25 +1131,132 @@ uint8_t align_text_right(char* string, FontDef_t font){
  */
 static int get_param_value(char* string, menu_page_t page){
     int result = 0;
+    uint8_t pos = 0;
     switch (page) {
-    case MEAS_CH_0:
-    case MEAS_CH_1:
-    case MEAS_CH_2:
-    case MEAS_CH_3:
-    case MEAS_CH_4:
-    case MEAS_CH_5:
-    case MEAS_CH_6:
-    case MEAS_CH_7:
-    case MEAS_CH_8:
-    case MEAS_CH_9:
-        sprintf(string, "%.1f", (double)dcts_meas[(uint8_t)(page - MEAS_CH_0)].value);//, dcts_meas[(uint8_t)(page - MEAS_CH_0)].unit_cyr);
-        if(dcts_meas[(uint8_t)(page - MEAS_CH_0)].valid == 1){
+    case SELF_TMPR:
+    case SELF_HUM:
+    case SELF_VREF:
+    case SELF_VBAT:
+        pos = (uint8_t)(page - SELF_TMPR);
+        sprintf(string, "%.1f", (double)dcts_meas[pos].value);
+        if(dcts_meas[pos].valid == 1){
             result = -1;
         }else{
             result = -2;
         }
         break;
 
+    case CH_0_MODE_PAGE:
+    case CH_1_MODE_PAGE:
+    case CH_2_MODE_PAGE:
+    case CH_3_MODE_PAGE:
+        pos = (uint8_t)((page - CH_0_MODE_PAGE)/(CH_1_MODE_PAGE - CH_0_MODE_PAGE));
+        sprintf(string, "%s", ch_mode_descr[config.params.ch_mode[pos]]);
+        break;
+    case CH_0_DO_STATE_PAGE:
+    case CH_1_DO_STATE_PAGE:
+    case CH_2_DO_STATE_PAGE:
+    case CH_3_DO_STATE_PAGE:
+        pos = (uint8_t)((page - CH_0_DO_STATE_PAGE)/(CH_1_DO_STATE_PAGE - CH_0_DO_STATE_PAGE));
+        sprintf(string, "%s", off_on_descr[dcts_rele[pos].state.control]);
+        if(dcts_rele[pos].state.control_by_act == 1){
+            result = -3;
+        }
+        break;
+    case CH_0_DO_CTRL_PAGE:
+    case CH_1_DO_CTRL_PAGE:
+    case CH_2_DO_CTRL_PAGE:
+    case CH_3_DO_CTRL_PAGE:
+        pos = (uint8_t)((page - CH_0_DO_CTRL_PAGE)/(CH_1_DO_CTRL_PAGE - CH_0_DO_CTRL_PAGE));
+        sprintf(string, "%s", manual_auto_descr[dcts_rele[pos].state.control_by_act]);
+        break;
+    case CH_0_PWM_DUTY_PAGE:
+    case CH_1_PWM_DUTY_PAGE:
+    case CH_2_PWM_DUTY_PAGE:
+    case CH_3_PWM_DUTY_PAGE:
+        pos = (uint8_t)((page - CH_0_PWM_DUTY_PAGE)/(CH_1_PWM_DUTY_PAGE - CH_0_PWM_DUTY_PAGE));
+        sprintf(string, "%.1f%s", (double)dcts_act[pos].set_value, dcts_act[pos].unit_cyr);
+        break;
+    case CH_0_PWM_CTRL_PAGE:
+    case CH_1_PWM_CTRL_PAGE:
+    case CH_2_PWM_CTRL_PAGE:
+    case CH_3_PWM_CTRL_PAGE:
+        pos = (uint8_t)((page - CH_0_PWM_CTRL_PAGE)/(CH_1_PWM_CTRL_PAGE - CH_0_PWM_CTRL_PAGE));
+        sprintf(string, "%s", off_on_descr[dcts_act[pos].state.control]);
+        break;
+    case CH_0_TMPR_PAGE:
+    case CH_1_TMPR_PAGE:
+    case CH_2_TMPR_PAGE:
+    case CH_3_TMPR_PAGE:
+        pos = (uint8_t)((page - CH_0_TMPR_PAGE)/(CH_1_TMPR_PAGE - CH_0_TMPR_PAGE)*(CH_1_TMPR - CH_0_TMPR)+CH_0_TMPR);
+        sprintf(string, "%.1f", (double)dcts_meas[pos].value);
+        if(dcts_meas[pos].valid == 1){
+            result = -1;
+        }else{
+            result = -2;
+        }
+        break;
+    case CH_0_HUM_PAGE:
+    case CH_1_HUM_PAGE:
+    case CH_2_HUM_PAGE:
+    case CH_3_HUM_PAGE:
+        pos = (uint8_t)((page - CH_0_HUM_PAGE)/(CH_1_HUM_PAGE - CH_0_HUM_PAGE)*(CH_1_HUM - CH_0_HUM)+CH_0_HUM);
+        sprintf(string, "%.1f", (double)dcts_meas[pos].value);
+        if(dcts_meas[pos].valid == 1){
+            result = -1;
+        }else{
+            result = -2;
+        }
+        break;
+    case CH_0_ADC_PAGE:
+    case CH_1_ADC_PAGE:
+    case CH_2_ADC_PAGE:
+    case CH_3_ADC_PAGE:
+        pos = (uint8_t)((page - CH_0_ADC_PAGE)/(CH_1_ADC_PAGE - CH_0_ADC_PAGE)*(CH_1_ADC - CH_0_ADC)+CH_0_ADC);
+        sprintf(string, "%.1f", (double)dcts_meas[pos].value);
+        if(dcts_meas[pos].valid == 1){
+            result = -1;
+        }else{
+            result = -2;
+        }
+        break;
+    case CH_0_VLT_PAGE:
+    case CH_1_VLT_PAGE:
+    case CH_2_VLT_PAGE:
+    case CH_3_VLT_PAGE:
+        pos = (uint8_t)((page - CH_0_VLT_PAGE)/(CH_1_VLT_PAGE - CH_0_VLT_PAGE)*(CH_1_VLT - CH_0_VLT)+CH_0_VLT);
+        sprintf(string, "%.1f", (double)dcts_meas[pos].value);
+        if(dcts_meas[pos].valid == 1){
+            result = -1;
+        }else{
+            result = -2;
+        }
+        break;
+    case CH_0_CNT_PAGE:
+    case CH_1_CNT_PAGE:
+    case CH_2_CNT_PAGE:
+    case CH_3_CNT_PAGE:
+        pos = (uint8_t)((page - CH_0_CNT_PAGE)/(CH_1_CNT_PAGE - CH_0_CNT_PAGE)*(CH_1_CNT - CH_0_CNT)+CH_0_CNT);
+        sprintf(string, "%.1f", (double)dcts_meas[pos].value);
+        if(dcts_meas[pos].valid == 1){
+            result = -1;
+        }else{
+            result = -2;
+        }
+        break;
+    case CH_0_DI_STATE_PAGE:
+    case CH_1_DI_STATE_PAGE:
+    case CH_2_DI_STATE_PAGE:
+    case CH_3_DI_STATE_PAGE:
+        pos = (uint8_t)((page - CH_0_DI_STATE_PAGE)/(CH_1_DI_STATE_PAGE - CH_0_DI_STATE_PAGE)*(CH_1_DI - CH_0_DI)+CH_0_DI);
+        sprintf(string, "%.1f", (double)dcts_meas[pos].value);
+        if(dcts_meas[pos].valid == 1){
+            result = -1;
+        }else{
+            result = -2;
+        }
+        break;
+/*
     case ACT_EN_0:
     case ACT_EN_1:
         sprintf(string, "%s", off_on_descr[dcts_act[(uint8_t)(page - ACT_EN_0)/5].state.control]);
@@ -1062,14 +1288,14 @@ static int get_param_value(char* string, menu_page_t page){
         if(dcts_rele[(uint8_t)(page - RELE_CONTROL_0)/3].state.control_by_act == 1){
             result = -3;
         }
-        break;
+        break;*/
 
     case LIGHT_LVL:
-        /*sprintf(string, "%d%%", config.params.backlight_lvl);
-        SSD1306_SET_LIGHTLEVEL(config.params.backlight_lvl*255/100);*/
+        sprintf(string, "%d%%", config.params.lcd_backlight_lvl);
+        SSD1306_SET_LIGHTLEVEL(config.params.lcd_backlight_lvl*255/100);
         break;
     case AUTO_OFF:
-        //sprintf(string, "%dс", config.params.auto_off*10);
+        sprintf(string, "%dс", config.params.lcd_backlight_time*10);
         break;
     /*case SKIN:
         sprintf(string, "%s", skin_descr[config.params.skin]);
@@ -1211,30 +1437,30 @@ static void set_edit_value(menu_page_t page){
             edit_val.select_shift = 0;
             edit_val.select_width = Font_7x10.FontWidth*5;
         }
-        break;
+        break;*/
     case LIGHT_LVL:
-        edit_val.type = VAL_UINT8;
+        edit_val.type = VAL_UINT16;
         edit_val.digit_max = 2;
         edit_val.digit_min = 0;
         edit_val.digit = 0;
-        edit_val.val_min.uint8 = 1;
-        edit_val.val_max.uint8 = 100;
-        edit_val.p_val.p_uint8 = &config.params.backlight_lvl;
+        edit_val.val_min.uint16 = 1;
+        edit_val.val_max.uint16 = 100;
+        edit_val.p_val.p_uint16 = &config.params.lcd_backlight_lvl;
         edit_val.select_shift = 1;
         edit_val.select_width = Font_7x10.FontWidth;
         break;
     case AUTO_OFF:
-        edit_val.type = VAL_UINT8;
+        edit_val.type = VAL_UINT16;
         edit_val.digit_max = 1;
         edit_val.digit_min = 0;
         edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 60;
-        edit_val.p_val.p_uint8 = &config.params.auto_off;
+        edit_val.val_min.uint16 = 0;
+        edit_val.val_max.uint16 = 60;
+        edit_val.p_val.p_uint16 = &config.params.lcd_backlight_time;
         edit_val.select_shift = 2;
         edit_val.select_width = Font_7x10.FontWidth;
         break;
-    case SKIN:
+    /*case SKIN:
         edit_val.type = VAL_UINT8;
         edit_val.digit_max = 0;
         edit_val.digit_min = 0;
@@ -1244,7 +1470,7 @@ static void set_edit_value(menu_page_t page){
         edit_val.p_val.p_uint8 = &config.params.skin;
         edit_val.select_shift = 0;
         edit_val.select_width = Font_7x10.FontWidth*6;
-        break;
+        break;*/
     case TIME_HOUR:
         edit_val.type = VAL_UINT8;
         edit_val.digit_max = 1;
@@ -1310,7 +1536,7 @@ static void set_edit_value(menu_page_t page){
         edit_val.p_val.p_uint16 = &dcts.dcts_rtc.year;
         edit_val.select_shift = 0;
         edit_val.select_width = Font_7x10.FontWidth;
-        break;*/
+        break;
     }
 }
 
@@ -1599,7 +1825,33 @@ void restore_params(void){
         }
     }else{
         //init default values if saved params not found
+        set_def_params();
     }
+}
+
+int set_def_params(void){
+    int result = 0;
+    config.params.mdb_address = 10;
+    dcts.dcts_address = (uint8_t)config.params.mdb_address;
+    config.params.mdb_bitrate = BITRATE_115200;
+    config.params.lcd_backlight_lvl = 3;
+    config.params.lcd_backlight_time = 12;
+    for(uint8_t i = 0; i < ACT_NUM; i++){
+        config.params.act_enable[i] = 0;
+        config.params.act_set[i] = 0.0f;
+        config.params.act_hyst[i] = 1.0f;
+        dcts_act[i].set_value = config.params.act_set[i];
+        dcts_act[i].hysteresis = config.params.act_hyst[i];
+        dcts_act[i].state.control = (uint8_t)config.params.act_enable[i];
+    }
+    for(uint8_t i = 0; i < RELE_NUM; i++){
+        config.params.rele[i] = 0;
+        dcts_rele[i].state.control_by_act = (uint8_t)(config.params.rele[i]);
+    }
+    for(uint8_t i = 0; i < CH_NUM; i++){
+        config.params.ch_mode[i] = CH_MODE_NONE;
+    }
+    return result;
 }
 
 

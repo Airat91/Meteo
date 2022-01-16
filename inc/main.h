@@ -83,11 +83,11 @@
 #define STEP_PORT GPIOB*/
 
 #define CH_NUM 4
-#define MEAS_NUM 24
+#define MEAS_NUM 28
 #define ACT_NUM 8
 #define RELE_NUM 4
 #define ARRAY_NUM 0
-#define SAVED_PARAMS_SIZE 44
+#define SAVED_PARAMS_SIZE 50
 #if(STM32F103xB == 1)
 #define BKP_REG_NUM 10
 #elif(STM32F103x8 == 1)
@@ -122,28 +122,32 @@
  typedef enum {
      TMPR_SELF = 0,
      HUM_SELF,
+     VREF_VLT,
+     VBAT_VLT,
      CH_0_TMPR,
      CH_0_HUM,
      CH_0_ADC,
      CH_0_VLT,
      CH_0_CNT,
+     CH_0_DI,
      CH_1_TMPR,
      CH_1_HUM,
      CH_1_ADC,
      CH_1_VLT,
      CH_1_CNT,
+     CH_1_DI,
      CH_2_TMPR,
      CH_2_HUM,
      CH_2_ADC,
      CH_2_VLT,
      CH_2_CNT,
+     CH_2_DI,
      CH_3_TMPR,
      CH_3_HUM,
      CH_3_ADC,
      CH_3_VLT,
      CH_3_CNT,
-     VREF_VLT,
-     VBAT_VLT,
+     CH_3_DI,
  }dcts_meas_t;
 
  typedef enum {
@@ -212,17 +216,28 @@ typedef enum{
      uint8_t select_shift;
  }edit_val_t;
 
+ typedef enum ch_mode_t{
+     CH_MODE_NONE = 0,
+     CH_MODE_AI_VLT,
+     CH_MODE_DI_DRY,
+     CH_MODE_DO,
+     CH_MODE_AM3202,
+     CH_MODE_PWM,
+     CH_MODE_DS18B20,
+ }ch_mode_t;
+
 typedef union{
     struct{
-        uint16_t mdb_address;
-        uint16_t mdb_bitrate;
-        uint16_t lcd_backlight_lvl;
-        uint16_t lcd_backlight_time;
-        uint16_t act_enable[ACT_NUM];
-        float    act_set[ACT_NUM];
-        float    act_hyst[ACT_NUM];
-        uint16_t rele[RELE_NUM];
-    }params;
+        uint16_t mdb_address;           // 1
+        uint16_t mdb_bitrate;           // 1
+        uint16_t lcd_backlight_lvl;     // 1
+        uint16_t lcd_backlight_time;    // 1
+        uint16_t act_enable[ACT_NUM];   // 1*8
+        float    act_set[ACT_NUM];      // 2*8
+        float    act_hyst[ACT_NUM];     // 2*8
+        uint16_t rele[RELE_NUM];        // 1*4
+        ch_mode_t ch_mode[CH_NUM];      // 0.5*4
+    }params;                            // 50
     uint16_t word[SAVED_PARAMS_SIZE];
 }saved_to_flash_t;
 
@@ -232,30 +247,20 @@ typedef struct{
 }ch_t;
 
 typedef enum{
-    CH_MODE_NONE = 0,
-    CH_MODE_ADC,
-    CH_MODE_DI,
-    CH_MODE_DO,
-    CH_MODE_AM3202,
-    CH_MODE_PWM,
-    CH_MODE_DS18B20,
-}ch_mode_t;
-
-typedef enum{
     PUMP_EMPTY = 0,
     PUMP_FILLING,
     PUMP_ACTIVE,
 }pump_st_t;
 
 typedef struct{
-    ch_mode_t mode;
+    ch_mode_t * mode;
     GPIO_TypeDef * port;
     uint16_t pin;
     ADC_TypeDef * adc_num;
     uint32_t adc_channel;
     TIM_TypeDef * pwm_tim;
     uint32_t pwm_channel;
-}in_channel_t;
+}ch_config_t;
 
 typedef union{
     uint8_t u8_data[BKP_REG_NUM*2];
@@ -288,7 +293,7 @@ extern osThreadId uartTaskHandle;
 extern saved_to_flash_t config;
 extern const ch_t do_ch[];
 extern const ch_t ch[];
-extern in_channel_t input_ch[];
+extern ch_config_t ch_config[];
 extern bkp_data_t *bkp_data_p;
 extern IWDG_HandleTypeDef hiwdg;
 

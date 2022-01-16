@@ -80,7 +80,7 @@
 
 #define RTC_HAL     1
 #define RTC_UNIX    2
-#define RTC_TIME    RTC_HAL //(RTC_HAL or RTC_UNIX)
+#define RTC_TIME    RTC_UNIX //(RTC_HAL or RTC_UNIX)
 
 #define LCD_DISP 1
 #define ST7735_DISP 2
@@ -176,20 +176,12 @@ static const char manual_auto_descr[2][10] = {
     "Ручной",
     "Авто",
 };
-static const char ch_mode_descr[6][10] = {
-    "Неактивен",
-    "Аналоговый",
-    "Дис. вход",
-    "Дис. выход",
-    "AM2302",
-    "ШИМ-выход",
-};
 
-in_channel_t input_ch[CH_NUM] = {
-    {.mode = CH_MODE_ADC,   .port = CH_0_PORT, .pin = CH_0_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_0, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_1},
-    {.mode = CH_MODE_ADC,   .port = CH_1_PORT, .pin = CH_1_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_1, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_2},
-    {.mode = CH_MODE_AM3202,.port = CH_2_PORT, .pin = CH_2_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_2, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_3},
-    {.mode = CH_MODE_AM3202,.port = CH_3_PORT, .pin = CH_3_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_3, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_4},
+ch_config_t ch_config[CH_NUM] = {
+    {.mode = &config.params.ch_mode[0], .port = CH_0_PORT, .pin = CH_0_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_0, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_1},
+    {.mode = &config.params.ch_mode[1], .port = CH_1_PORT, .pin = CH_1_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_1, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_2},
+    {.mode = &config.params.ch_mode[2], .port = CH_2_PORT, .pin = CH_2_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_2, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_3},
+    {.mode = &config.params.ch_mode[3], .port = CH_3_PORT, .pin = CH_3_PIN, .adc_num = ADC1, .adc_channel = ADC_CHANNEL_3, .pwm_tim = TIM2, .pwm_channel = TIM_CHANNEL_4},
 };
 
 /**
@@ -268,33 +260,37 @@ void dcts_init (void) {
 
     dcts_meas_channel_init(TMPR_SELF,   "Tmpr",         "Температура",  "°C",   "°C");
     dcts_meas_channel_init(HUM_SELF,    "Hum",          "Влажнсть",     "%",    "%");
+    dcts_meas_channel_init(VREF_VLT,    "Vref V",       "Опорное напр.","V",    "В");
+    dcts_meas_channel_init(VBAT_VLT,    "RTC battery V","Батарейка",    "V",    "В");
 
     dcts_meas_channel_init(CH_0_TMPR,   "CH_0 Tmpr",    "Кан_0 Темп.",  "°C",   "°C");
     dcts_meas_channel_init(CH_0_HUM,    "CH_0 Hum",     "Кан_0 Влажн.", "%",    "%");
     dcts_meas_channel_init(CH_0_ADC,    "CH_0 ADC",     "Кан_0 АЦП",    "adc",  "ацп");
     dcts_meas_channel_init(CH_0_VLT,    "CH_0 VLT",     "Кан_0 Напр.",  "V",    "В");
     dcts_meas_channel_init(CH_0_CNT,    "CH_0 CNT",     "Кан_0 Имп.",   "pls",  "имп");
+    dcts_meas_channel_init(CH_0_DI,     "CH_0 DI",      "Кан_0 Лог.",   "log",  "лог");
 
     dcts_meas_channel_init(CH_1_TMPR,   "CH_1 Tmpr",    "Кан_1 Темп.",  "°C",   "°C");
     dcts_meas_channel_init(CH_1_HUM,    "CH_1 Hum",     "Кан_1 Влажн.", "%",    "%");
     dcts_meas_channel_init(CH_1_ADC,    "CH_1 ADC",     "Кан_1 АЦП",    "adc",  "ацп");
     dcts_meas_channel_init(CH_1_VLT,    "CH_1 VLT",     "Кан_1 Напр.",  "V",    "В");
     dcts_meas_channel_init(CH_1_CNT,    "CH_1 CNT",     "Кан_1 Имп.",   "pls",  "имп");
+    dcts_meas_channel_init(CH_1_DI,     "CH_1 DI",      "Кан_1 Лог.",   "log",  "лог");
 
     dcts_meas_channel_init(CH_2_TMPR,   "CH_2 Tmpr",    "Кан_2 Темп.",  "°C",   "°C");
     dcts_meas_channel_init(CH_2_HUM,    "CH_2 Hum",     "Кан_2 Влажн.", "%",    "%");
     dcts_meas_channel_init(CH_2_ADC,    "CH_2 ADC",     "Кан_2 АЦП",    "adc",  "ацп");
     dcts_meas_channel_init(CH_2_VLT,    "CH_2 VLT",     "Кан_2 Напр.",  "V",    "В");
     dcts_meas_channel_init(CH_2_CNT,    "CH_2 CNT",     "Кан_2 Имп.",   "pls",  "имп");
+    dcts_meas_channel_init(CH_2_DI,     "CH_2 DI",      "Кан_2 Лог.",   "log",  "лог");
 
     dcts_meas_channel_init(CH_3_TMPR,   "CH_3 Tmpr",    "Кан_3 Темп.",  "°C",   "°C");
     dcts_meas_channel_init(CH_3_HUM,    "CH_3 Hum",     "Кан_3 Влажн.", "%",    "%");
     dcts_meas_channel_init(CH_3_ADC,    "CH_3 ADC",     "Кан_3 АЦП",    "adc",  "ацп");
     dcts_meas_channel_init(CH_3_VLT,    "CH_3 VLT",     "Кан_3 Напр.",  "V",    "В");
     dcts_meas_channel_init(CH_3_CNT,    "CH_3 CNT",     "Кан_3 Имп.",   "pls",  "имп");
+    dcts_meas_channel_init(CH_3_DI,     "CH_3 DI",      "Кан_3 Лог.",   "log",  "лог");
 
-    dcts_meas_channel_init(VREF_VLT,    "Vref V",       "Опорное напр.","V",    "В");
-    dcts_meas_channel_init(VBAT_VLT,    "RTC battery V","Батарейка",    "V",    "В");
 
     //act_channels
 
@@ -423,7 +419,7 @@ static void RTC_Init(void){
         system_time.tm_sec = dcts.dcts_rtc.second;
 
         system_time.tm_mday = dcts.dcts_rtc.day;
-        system_time.tm_mon = dcts.dcts_rtc.month;
+        system_time.tm_mon = dcts.dcts_rtc.month - 1;
         system_time.tm_year = dcts.dcts_rtc.year - 1900;
 
         unix_time = mktime(&system_time);
@@ -511,9 +507,13 @@ void rtc_task(void const * argument){
             dcts.dcts_rtc.second    = (u8)system_time.tm_sec;
 
             dcts.dcts_rtc.day       = (u8)system_time.tm_mday;
-            dcts.dcts_rtc.month     = (u8)system_time.tm_mon;
+            dcts.dcts_rtc.month     = (u8)system_time.tm_mon + 1;
             dcts.dcts_rtc.year      = (u8)system_time.tm_year + 1900;
-            dcts.dcts_rtc.weekday   = (u8)system_time.tm_wday;
+            if(system_time.tm_wday == 0){
+                dcts.dcts_rtc.weekday = 7;
+            }else{
+                dcts.dcts_rtc.weekday   = (u8)system_time.tm_wday;
+            }
 
             taskEXIT_CRITICAL();
 #endif // RTC_TIME
@@ -1148,1201 +1148,6 @@ static void menu_page_print(u8 tick){
     print_enter_right();
 }
 
-static void value_print(u8 tick){
-    char string[50];
-    print_header();
-    int prev = 0;
-    int cur = 0;
-    int next = 0;
-
-    menuItem* temp = selectedMenuItem->Parent;
-#if(DISP == LCD_DISP)
-    /*if(temp->Child_num >= 3){
-        //print previous name
-        temp = selectedMenuItem->Previous;
-        sprintf(string, temp->Text);
-        LCD_set_xy(2,39);
-        LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-        LCD_fill_area(80,39,127,49,LCD_COLOR_WHITE);
-        prev = get_param_value(string, temp->Page);
-        LCD_set_xy(align_text_right(string,Font_7x10),39);
-        LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-        if(prev == -2){
-            // invalid value
-            LCD_fill_area(84,45,127,45,LCD_COLOR_BLACK);
-        }
-    }
-
-    //print selected name
-    sprintf(string, selectedMenuItem->Text);
-    LCD_set_xy(2,26);
-    LCD_print_ticker(string,&Font_7x10,LCD_COLOR_BLACK,11,tick);
-    cur = get_param_value(string, selectedMenuItem->Page);
-    LCD_set_xy(align_text_right(string,Font_7x10),26);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    if(cur == -2){
-        // invalid value
-        LCD_fill_area(84,32,127,32,LCD_COLOR_BLACK);
-    }
-
-    LCD_invert_area(0,26,82,38);
-    LCD_invert_area(1,27,81,37);
-
-    //print next name
-    temp = selectedMenuItem->Next;
-    sprintf(string, temp->Text);
-    LCD_set_xy(2,14);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    LCD_fill_area(80,14,127,24,LCD_COLOR_WHITE);
-    next = get_param_value(string, temp->Page);
-    LCD_set_xy(align_text_right(string,Font_7x10),14);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    if(next == -2){
-        // invalid value
-        LCD_fill_area(84,20,127,20,LCD_COLOR_BLACK);
-    }*/
-#elif(DISP == ST7735_DISP)
-    uint8_t line_pointer = 0;
-
-    sprintf(string, selectedMenuItem->Text);
-    st7735_fill_rect(0,102,96,13,ST7735_BLUE);
-    st7735_xy(2,102);
-    st7735_print(string,&Font_7x10,ST7735_WHITE);
-    cur = get_param_value(string, selectedMenuItem->Page);
-    st7735_fill_rect(96,102,64,11,ST7735_WHITE);
-    st7735_xy(align_text_right(string,Font_7x10)+32,102);
-    if(cur == -2){
-        // invalid value
-        st7735_print(string,&Font_7x10,ST7735_RED);
-    }else{
-        st7735_print(string,&Font_7x10,ST7735_BLACK);
-    }
-    line_pointer++;
-
-    menuItem* next_page = selectedMenuItem->Next;
-    while((line_pointer < temp->Child_num)&&(line_pointer < DISP_MAX_LINES)){
-        sprintf(string, next_page->Text);
-        st7735_xy(2,102-13*line_pointer);
-        st7735_print(string,&Font_7x10,ST7735_BLACK);
-        cur = get_param_value(string, next_page->Page);
-        st7735_fill_rect(96,102-13*line_pointer,64,11,ST7735_WHITE);
-        st7735_xy(align_text_right(string,Font_7x10)+32,102-13*line_pointer);
-        if(cur == -2){
-            // invalid value
-            st7735_print(string,&Font_7x10,ST7735_RED);
-        }else{
-            st7735_print(string,&Font_7x10,ST7735_BLACK);
-        }
-        next_page = next_page->Next;
-        line_pointer++;
-    }
-
-    st7735_fill_rect(0,0,160,9,ST7735_WHITE);
-#endif // DISP
-    print_back();
-
-    if(navigation_style == MENU_NAVIGATION){
-        set_edit_value(selectedMenuItem->Page);
-        if((selectedMenuItem->Child == &EDITED_VAL)&&(cur != -3)){
-            print_change();
-        }
-    }else if(navigation_style == DIGIT_EDIT){
-        print_enter_ok();
-#if(DISP == LCD_DISP)
-        /*if(edit_val.digit < 0){
-            LCD_invert_area(127-(u8)(edit_val.digit+edit_val.select_shift)*edit_val.select_width,26,127-(u8)(edit_val.digit+edit_val.select_shift-1)*edit_val.select_width,38);
-        }else{
-            LCD_invert_area(127-(u8)(edit_val.digit+edit_val.select_shift+1)*edit_val.select_width,26,127-(u8)(edit_val.digit+edit_val.select_shift)*edit_val.select_width,38);
-        }*/
-#elif(DISP == ST7735_DISP)
-        if(edit_val.digit < 0){
-            st7735_fill_rect(159-(u8)(edit_val.digit+edit_val.select_shift)*edit_val.select_width,102,edit_val.select_width,1,ST7735_BLACK);
-        }else{
-            st7735_fill_rect(159-(u8)(edit_val.digit+edit_val.select_shift+1)*edit_val.select_width,102,edit_val.select_width,1,ST7735_BLACK);
-        }
-#endif // DISP
-    }
-}
-
-/**
- * @brief get_param_value
- * @param string - buffer for set value
- * @param page -
- * @return  0 - haven't additional data,\n
- *          -1 - valid value,\n
- *          -2 - invalid value,\n
- *          -3 - don't change,
- */
-static int get_param_value(char* string, menu_page_t page){
-    int result = 0;
-    switch (page) {
-    case MEAS_CH_0:
-    case MEAS_CH_1:
-    case MEAS_CH_2:
-    case MEAS_CH_3:
-    case MEAS_CH_4:
-    case MEAS_CH_5:
-    case MEAS_CH_6:
-    case MEAS_CH_7:
-    case MEAS_CH_8:
-    case MEAS_CH_9:
-    case MEAS_CH_10:
-    case MEAS_CH_11:
-    case MEAS_CH_12:
-    case MEAS_CH_13:
-    case MEAS_CH_14:
-    case MEAS_CH_15:
-        sprintf(string, "%.1f", (double)dcts_meas[(uint8_t)(page - MEAS_CH_0)].value);//, dcts_meas[(uint8_t)(page - MEAS_CH_0)].unit_cyr);
-        if(dcts_meas[(uint8_t)(page - MEAS_CH_0)].valid == 1){
-            result = -1;
-        }else{
-            result = -2;
-        }
-        break;
-
-    case ACT_EN_0:
-    case ACT_EN_1:
-    case ACT_EN_2:
-    case ACT_EN_3:
-    case ACT_EN_4:
-    case ACT_EN_5:
-        sprintf(string, "%s", off_on_descr[dcts_act[(uint8_t)(page - ACT_EN_0)/5].state.control]);
-        break;
-
-    case ACT_SET_0:
-    case ACT_SET_1:
-    case ACT_SET_2:
-    case ACT_SET_3:
-    case ACT_SET_4:
-    case ACT_SET_5:
-        sprintf(string, "%.1f%s", (double)dcts_act[(uint8_t)(page - ACT_EN_0)/5].set_value, dcts_act[(uint8_t)(page - ACT_EN_0)/5].unit_cyr);
-        break;
-
-    case ACT_HYST_0:
-    case ACT_HYST_1:
-    case ACT_HYST_2:
-    case ACT_HYST_3:
-    case ACT_HYST_4:
-    case ACT_HYST_5:
-        sprintf(string, "%.1f%s", (double)dcts_act[(uint8_t)(page - ACT_HYST_0)/5].hysteresis, dcts_act[(uint8_t)(page - ACT_HYST_0)/5].unit_cyr);
-        break;
-
-    case ACT_CUR_0:
-    case ACT_CUR_1:
-    case ACT_CUR_2:
-    case ACT_CUR_3:
-    case ACT_CUR_4:
-    case ACT_CUR_5:
-        sprintf(string, "%.1f%s", (double)dcts_act[(uint8_t)(page - ACT_CUR_0)/5].meas_value, dcts_act[(uint8_t)(page - ACT_CUR_0)/5].unit_cyr);
-        break;
-
-    case WTR_MIN_REF:
-        //sprintf(string, "%.1f", (double)config.params.wtr_min_ref);
-        break;
-    case WTR_MAX_REF:
-        //sprintf(string, "%.1f", (double)config.params.wtr_max_ref);
-        break;
-
-    case RELE_AUTO_MAN_0:
-    case RELE_AUTO_MAN_1:
-    case RELE_AUTO_MAN_2:
-    case RELE_AUTO_MAN_3:
-    case RELE_AUTO_MAN_4:
-    case RELE_AUTO_MAN_5:
-        sprintf(string, "%s", manual_auto_descr[dcts_rele[(uint8_t)(page - RELE_AUTO_MAN_0)/3].state.control_by_act]);
-        break;
-
-    case RELE_CONTROL_0:
-    case RELE_CONTROL_1:
-    case RELE_CONTROL_2:
-    case RELE_CONTROL_3:
-    case RELE_CONTROL_4:
-    case RELE_CONTROL_5:
-        sprintf(string, "%s", off_on_descr[dcts_rele[(uint8_t)(page - RELE_CONTROL_0)/3].state.control]);
-        if(dcts_rele[(uint8_t)(page - RELE_CONTROL_0)/3].state.control_by_act == 1){
-            result = -3;
-        }
-        break;
-
-    case MDB_ADDR:
-        sprintf(string, "%d", dcts.dcts_address);
-        break;
-    case MDB_BITRATE:
-        sprintf(string, "%d", bitrate_array[bitrate_array_pointer]*100);
-        break;
-    case MDB_RECIEVED:
-        sprintf(string, "%d", uart_1.recieved_cnt);
-        break;
-    case MDB_SENT:
-        sprintf(string, "%d", uart_1.send_cnt);
-        break;
-    case MDB_OVERRUN_ERR:
-        sprintf(string, "%d", uart_1.overrun_err_cnt);
-        break;
-    case MDB_PARITY_ERR:
-        sprintf(string, "%d", uart_1.parity_err_cnt);
-        break;
-    case MDB_FRAME_ERR:
-        sprintf(string, "%d", uart_1.frame_err_cnt);
-        break;
-    case MDB_NOISE_ERR:
-        sprintf(string, "%d", uart_1.noise_err_cnt);
-        break;
-
-    case LIGHT_LVL:
-        /*sprintf(string, "%d%%", LCD.backlight_lvl*10);
-        LCD_backlight_timer_init();
-        LCD_backlight_on();*/
-        break;
-    case AUTO_OFF:
-        //sprintf(string, "%dс", LCD.auto_off*10);
-        break;
-
-    case TIME_HOUR:
-        sprintf(string, "%02d", dcts.dcts_rtc.hour);
-        break;
-    case TIME_MIN:
-        sprintf(string, "%02d", dcts.dcts_rtc.minute);
-        break;
-    case TIME_SEC:
-        sprintf(string, "%02d", dcts.dcts_rtc.second);
-        break;
-    case DATE_DAY:
-        sprintf(string, "%02d", dcts.dcts_rtc.day);
-        break;
-    case DATE_MONTH:
-        sprintf(string, "%02d", dcts.dcts_rtc.month);
-        break;
-    case DATE_YEAR:
-        sprintf(string, "%04d", dcts.dcts_rtc.year);
-        break;
-    }
-    return result;
-}
-
-static void set_edit_value(menu_page_t page){
-    switch(page){
-    /*case ACT_EN_0:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_act[VALVE_IN].state.control;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*5;
-        break;
-    case ACT_EN_1:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_act[VALVE_OUT].state.control;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*5;
-        break;
-    case ACT_EN_2:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_act[TMPR_IN_HEATING].state.control;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*5;
-        break;
-    case ACT_EN_3:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_act[TMPR_IN_COOLING].state.control;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*5;
-        break;
-    case ACT_EN_4:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_act[HUM_IN].state.control;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*5;
-        break;
-    case ACT_EN_5:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_act[AUTO_PUMP].state.control;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*5;
-        break;
-    case ACT_SET_0:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[VALVE_IN].set_value;
-        edit_val.select_shift = 3;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case ACT_SET_1:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[VALVE_OUT].set_value;
-        edit_val.select_shift = 3;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case ACT_SET_2:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[TMPR_IN_HEATING].set_value;
-        edit_val.select_shift = 4;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case ACT_SET_3:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[TMPR_IN_COOLING].set_value;
-        edit_val.select_shift = 4;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case ACT_SET_4:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[HUM_IN].set_value;
-        edit_val.select_shift = 3;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case ACT_SET_5:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[AUTO_PUMP].set_value;
-        edit_val.select_shift = 3;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case ACT_HYST_0:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[VALVE_IN].hysteresis;
-        edit_val.select_shift = 3;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case ACT_HYST_1:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[VALVE_OUT].hysteresis;
-        edit_val.select_shift = 3;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case ACT_HYST_2:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[TMPR_IN_HEATING].hysteresis;
-        edit_val.select_shift = 4;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case ACT_HYST_3:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[TMPR_IN_COOLING].hysteresis;
-        edit_val.select_shift = 4;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case ACT_HYST_4:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[HUM_IN].hysteresis;
-        edit_val.select_shift = 3;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case ACT_HYST_5:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 100.0;
-        edit_val.p_val.p_float = &dcts_act[AUTO_PUMP].hysteresis;
-        edit_val.select_shift = 3;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case WTR_MIN_REF:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 3;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 9999.0;
-        edit_val.p_val.p_float = &config.params.wtr_min_ref;
-        edit_val.select_shift = 2;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case WTR_MAX_REF:
-        edit_val.type = VAL_FLOAT;
-        edit_val.digit_max = 3;
-        edit_val.digit_min = -1;
-        edit_val.digit = 0;
-        edit_val.val_min.vfloat = 0.0;
-        edit_val.val_max.vfloat = 9999.0;
-        edit_val.p_val.p_float = &config.params.wtr_max_ref;
-        edit_val.select_shift = 2;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case RELE_AUTO_MAN_0:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_rele[FAN_IN].state.control_by_act;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*6;
-        break;
-    case RELE_AUTO_MAN_1:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_rele[HEATER].state.control_by_act;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*6;
-        break;
-    case RELE_AUTO_MAN_2:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_rele[FREEZER].state.control_by_act;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*6;
-        break;
-    case RELE_AUTO_MAN_3:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_rele[FAN_CONVECTION].state.control_by_act;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*6;
-        break;
-    case RELE_AUTO_MAN_4:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_rele[WTR_PUMP].state.control_by_act;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*6;
-        break;
-    case RELE_AUTO_MAN_5:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 1;
-        edit_val.p_val.p_uint8 = &dcts_rele[RESERV].state.control_by_act;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*6;
-        break;
-    case RELE_CONTROL_0:
-        if(dcts_rele[FAN_IN].state.control_by_act == 0){
-            edit_val.type = VAL_UINT8;
-            edit_val.digit_max = 0;
-            edit_val.digit_min = 0;
-            edit_val.digit = 0;
-            edit_val.val_min.uint8 = 0;
-            edit_val.val_max.uint8 = 1;
-            edit_val.p_val.p_uint8 = &dcts_rele[FAN_IN].state.control;
-            edit_val.select_shift = 0;
-            edit_val.select_width = Font_7x10.FontWidth*5;
-        }
-        break;
-    case RELE_CONTROL_1:
-        if(dcts_rele[HEATER].state.control_by_act == 0){
-            edit_val.type = VAL_UINT8;
-            edit_val.digit_max = 0;
-            edit_val.digit_min = 0;
-            edit_val.digit = 0;
-            edit_val.val_min.uint8 = 0;
-            edit_val.val_max.uint8 = 1;
-            edit_val.p_val.p_uint8 = &dcts_rele[HEATER].state.control;
-            edit_val.select_shift = 0;
-            edit_val.select_width = Font_7x10.FontWidth*5;
-        }
-        break;
-    case RELE_CONTROL_2:
-        if(dcts_rele[FREEZER].state.control_by_act == 0){
-            edit_val.type = VAL_UINT8;
-            edit_val.digit_max = 0;
-            edit_val.digit_min = 0;
-            edit_val.digit = 0;
-            edit_val.val_min.uint8 = 0;
-            edit_val.val_max.uint8 = 1;
-            edit_val.p_val.p_uint8 = &dcts_rele[FREEZER].state.control;
-            edit_val.select_shift = 0;
-            edit_val.select_width = Font_7x10.FontWidth*5;
-        }
-        break;
-    case RELE_CONTROL_3:
-        if(dcts_rele[FAN_CONVECTION].state.control_by_act == 0){
-            edit_val.type = VAL_UINT8;
-            edit_val.digit_max = 0;
-            edit_val.digit_min = 0;
-            edit_val.digit = 0;
-            edit_val.val_min.uint8 = 0;
-            edit_val.val_max.uint8 = 1;
-            edit_val.p_val.p_uint8 = &dcts_rele[FAN_CONVECTION].state.control;
-            edit_val.select_shift = 0;
-            edit_val.select_width = Font_7x10.FontWidth*5;
-        }
-        break;
-    case RELE_CONTROL_4:
-        if(dcts_rele[WTR_PUMP].state.control_by_act == 0){
-            edit_val.type = VAL_UINT8;
-            edit_val.digit_max = 0;
-            edit_val.digit_min = 0;
-            edit_val.digit = 0;
-            edit_val.val_min.uint8 = 0;
-            edit_val.val_max.uint8 = 1;
-            edit_val.p_val.p_uint8 = &dcts_rele[WTR_PUMP].state.control;
-            edit_val.select_shift = 0;
-            edit_val.select_width = Font_7x10.FontWidth*5;
-        }
-        break;
-    case RELE_CONTROL_5:
-        if(dcts_rele[RESERV].state.control_by_act == 0){
-            edit_val.type = VAL_UINT8;
-            edit_val.digit_max = 0;
-            edit_val.digit_min = 0;
-            edit_val.digit = 0;
-            edit_val.val_min.uint8 = 0;
-            edit_val.val_max.uint8 = 1;
-            edit_val.p_val.p_uint8 = &dcts_rele[RESERV].state.control;
-            edit_val.select_shift = 0;
-            edit_val.select_width = Font_7x10.FontWidth*5;
-        }
-        break;
-    case MDB_ADDR:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 2;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 255;
-        edit_val.p_val.p_uint8 = &dcts.dcts_address;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case MDB_BITRATE:
-        edit_val.type = VAL_UINT16;
-        edit_val.digit_max = 0;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint16 = 0;
-        edit_val.val_max.uint16 = 11;
-        edit_val.p_val.p_uint16 = &bitrate_array_pointer;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth*6;
-        break;
-    case LIGHT_LVL:
-        edit_val.type = VAL_UINT16;
-        edit_val.digit_max = 1;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint16 = 1;
-        edit_val.val_max.uint16 = 10;
-        edit_val.p_val.p_uint16 = &LCD.backlight_lvl;
-        edit_val.select_shift = 2;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case AUTO_OFF:
-        edit_val.type = VAL_UINT16;
-        edit_val.digit_max = 1;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint16 = 1;
-        edit_val.val_max.uint16 = 60;
-        edit_val.p_val.p_uint16 = &LCD.auto_off;
-        edit_val.select_shift = 2;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case TIME_HOUR:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 1;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 23;
-        edit_val.p_val.p_uint8 = &dcts.dcts_rtc.hour;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case TIME_MIN:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 1;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 59;
-        edit_val.p_val.p_uint8 = &dcts.dcts_rtc.minute;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case TIME_SEC:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 1;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 0;
-        edit_val.val_max.uint8 = 59;
-        edit_val.p_val.p_uint8 = &dcts.dcts_rtc.second;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case DATE_DAY:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 1;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 1;
-        edit_val.val_max.uint8 = 31;
-        edit_val.p_val.p_uint8 = &dcts.dcts_rtc.day;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case DATE_MONTH:
-        edit_val.type = VAL_UINT8;
-        edit_val.digit_max = 1;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint8 = 1;
-        edit_val.val_max.uint8 = 12;
-        edit_val.p_val.p_uint8 = &dcts.dcts_rtc.month;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;
-    case DATE_YEAR:
-        edit_val.type = VAL_UINT16;
-        edit_val.digit_max = 3;
-        edit_val.digit_min = 0;
-        edit_val.digit = 0;
-        edit_val.val_min.uint16 = 2000;
-        edit_val.val_max.uint16 = 3000;
-        edit_val.p_val.p_uint16 = &dcts.dcts_rtc.year;
-        edit_val.select_shift = 0;
-        edit_val.select_width = Font_7x10.FontWidth;
-        break;*/
-    }
-}
-
-
-static void info_print (void){
-    char string[50];
-    print_header();
-#if(DISP == LCD_DISP)
-    /*sprintf(string, "Имя:%s",dcts.dcts_name_cyr);
-    LCD_set_xy(2,44);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
-    sprintf(string, "Адрес:%d",dcts.dcts_address);
-    LCD_set_xy(2,36);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
-    sprintf(string, "Версия:%s",dcts.dcts_ver);
-    LCD_set_xy(2,28);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
-    sprintf(string, "Питание:%.1fВ",(double)dcts.dcts_pwr);
-    LCD_set_xy(2,20);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
-    sprintf(string, "Батарейка:%.1fВ",(double)dcts_meas[VBAT_VLT].value);
-    LCD_set_xy(2,12);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
-    sprintf(string, "%02d:%02d:%02d", dcts.dcts_rtc.hour, dcts.dcts_rtc.minute, dcts.dcts_rtc.second);
-    LCD_set_xy(70,44);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);
-    sprintf(string, "%02d.%02d.%04d", dcts.dcts_rtc.day, dcts.dcts_rtc.month, dcts.dcts_rtc.year);
-    LCD_set_xy(70,36);
-    LCD_print(string,&Font_5x7,LCD_COLOR_BLACK);*/
-#elif(DISP == ST7735_DISP)
-    sprintf(string, "Имя:%s",dcts.dcts_name_cyr);
-    st7735_xy(2,44);
-    st7735_print(string,&Font_5x7,ST7735_BLACK);
-    sprintf(string, "Адрес:%d",dcts.dcts_address);
-    st7735_xy(2,36);
-    st7735_print(string,&Font_5x7,ST7735_BLACK);
-    sprintf(string, "Версия:%s",dcts.dcts_ver);
-    st7735_xy(2,28);
-    st7735_print(string,&Font_5x7,ST7735_BLACK);
-    sprintf(string, "Питание:%.1fВ",(double)dcts.dcts_pwr);
-    st7735_xy(2,20);
-    st7735_print(string,&Font_5x7,ST7735_BLACK);
-    sprintf(string, "Батарейка:%.1fВ",(double)dcts_meas[VBAT_VLT].value);
-    st7735_xy(2,12);
-    st7735_print(string,&Font_5x7,ST7735_BLACK);
-    sprintf(string, "%02d:%02d:%02d", dcts.dcts_rtc.hour, dcts.dcts_rtc.minute, dcts.dcts_rtc.second);
-    st7735_xy(70,44);
-    st7735_print(string,&Font_5x7,ST7735_BLACK);
-    sprintf(string, "%02d.%02d.%04d", dcts.dcts_rtc.day, dcts.dcts_rtc.month, dcts.dcts_rtc.year);
-    st7735_xy(70,36);
-    st7735_print(string,&Font_5x7,ST7735_BLACK);
-#endif // DISP
-
-    print_back();
-}
-
-/*static void calib_print (uint8_t start_channel){
-    char string[100];
-    menuItem* temp = selectedMenuItem->Parent;
-    uint16_t* calib_table;
-    sprintf(string, temp->Text);
-    LCD_set_xy(2,52);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    LCD_invert_area(0,53,127,63);
-    if(temp->Page == LVL_CALIB){
-        //sprintf(string, "%.0f",dcts_meas[WTR_LVL_ADC].value);
-        LCD_set_xy(align_text_right(string,Font_7x10),52);
-        LCD_print(string,&Font_7x10,LCD_COLOR_WHITE);
-        calib_table = config.params.lvl_calib_table;
-    }else if(temp->Page == TMPR_CALIB){
-        //sprintf(string, "%.0f",dcts_meas[WTR_TMPR_ADC].value);
-        LCD_set_xy(align_text_right(string,Font_7x10),52);
-        LCD_print(string,&Font_7x10,LCD_COLOR_WHITE);
-        calib_table = config.params.tmpr_calib_table;
-    }
-
-    temp = selectedMenuItem->Previous;
-    sprintf(string, temp->Text);
-    LCD_set_xy(1,39);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    sprintf(string, "%d",calib_table[(uint8_t)temp->Page-start_channel]);
-    LCD_set_xy(align_text_right(string, Font_7x10)-1,39);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-
-    sprintf(string, selectedMenuItem->Text);
-    LCD_set_xy(1,26);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    sprintf(string, "%d",calib_table[(uint8_t)selectedMenuItem->Page-start_channel]);
-    LCD_set_xy(align_text_right(string, Font_7x10)-1,26);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    LCD_invert_area(0,26,127,39);
-    LCD_invert_area(1,27,126,38);
-
-    temp = selectedMenuItem->Next;
-    sprintf(string, temp->Text);
-    LCD_set_xy(1,14);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    sprintf(string, "%d",calib_table[(uint8_t)temp->Page-start_channel]);
-    LCD_set_xy(align_text_right(string, Font_7x10)-1,14);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-
-    switch (navigation_style) {
-    case MENU_NAVIGATION:
-        sprintf(string, "<назад   изменить>");
-        LCD_set_xy(0,0);
-        LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-        LCD_invert_area(0,0,42,11);
-        LCD_invert_area(62,0,127,11);
-
-        if(pressed_time[BUTTON_RIGHT].pressed > navigation_task_period){
-            while(pressed_time[BUTTON_RIGHT].last_state == BUTTON_PRESSED){
-            }
-            navigation_style = DIGIT_EDIT;
-            edit_val.digit_max = 3;
-            edit_val.digit = 0;
-            edit_val.val_min = 0;
-            edit_val.val_max = 0x4095;
-            edit_val.p_val = &calib_table[(uint8_t)selectedMenuItem->Page-start_channel];
-        }
-        break;
-    case DIGIT_EDIT:
-        sprintf(string, "*ввод");
-        LCD_set_xy(align_text_center(string, Font_7x10),0);
-        LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-        LCD_invert_area(46,0,82,11);
-
-        LCD_invert_area(127-(edit_val.digit+1)*Font_7x10.FontWidth,27,126-edit_val.digit*Font_7x10.FontWidth,38);
-        break;
-    }
-
-}*/
-
-
-/*static void mdb_print(void){
-    static uint8_t reinit_uart = 0;
-    char string[100];
-    menuItem* temp = selectedMenuItem->Parent;
-    sprintf(string, temp->Text);
-    LCD_set_xy(align_text_center(string,Font_7x10),52);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    LCD_invert_area(0,53,127,63);
-
-    temp = selectedMenuItem->Previous;
-    sprintf(string, temp->Text);
-    LCD_set_xy(1,39);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    switch (temp->Page) {
-    case MDB_OVERRUN_ERR:
-        sprintf(string, "%d",uart_2.overrun_err_cnt);
-        break;
-    case MDB_PARITY_ERR:
-        sprintf(string, "%d",uart_2.parity_err_cnt);
-        break;
-    case MDB_FRAME_ERR:
-        sprintf(string, "%d",uart_2.frame_err_cnt);
-        break;
-    case MDB_NOISE_ERR:
-        sprintf(string, "%d",uart_2.noise_err_cnt);
-        break;
-    case MDB_ADDR:
-        sprintf(string, "%d",config.params.mdb_address);
-        break;
-    case MDB_BITRATE:
-        sprintf(string, "%d",bitrate_array[bitrate_array_pointer]*100);
-        break;
-    }
-    LCD_set_xy(align_text_right(string, Font_7x10)-1,39);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-
-    sprintf(string, selectedMenuItem->Text);
-    LCD_set_xy(1,26);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    switch (selectedMenuItem->Page) {
-    case MDB_OVERRUN_ERR:
-        sprintf(string, "%d",uart_2.overrun_err_cnt);
-        break;
-    case MDB_PARITY_ERR:
-        sprintf(string, "%d",uart_2.parity_err_cnt);
-        break;
-    case MDB_FRAME_ERR:
-        sprintf(string, "%d",uart_2.frame_err_cnt);
-        break;
-    case MDB_NOISE_ERR:
-        sprintf(string, "%d",uart_2.noise_err_cnt);
-        break;
-    case MDB_ADDR:
-        sprintf(string, "%d",config.params.mdb_address);
-        break;
-    case MDB_BITRATE:
-        sprintf(string, "%d",bitrate_array[bitrate_array_pointer]*100);
-        break;
-    }
-    LCD_set_xy(align_text_right(string, Font_7x10)-1,26);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    LCD_invert_area(0,26,127,39);
-    LCD_invert_area(1,27,126,38);
-
-    temp = selectedMenuItem->Next;
-    sprintf(string, temp->Text);
-    LCD_set_xy(1,14);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    switch (temp->Page) {
-    case MDB_OVERRUN_ERR:
-        sprintf(string, "%d",uart_2.overrun_err_cnt);
-        break;
-    case MDB_PARITY_ERR:
-        sprintf(string, "%d",uart_2.parity_err_cnt);
-        break;
-    case MDB_FRAME_ERR:
-        sprintf(string, "%d",uart_2.frame_err_cnt);
-        break;
-    case MDB_NOISE_ERR:
-        sprintf(string, "%d",uart_2.noise_err_cnt);
-        break;
-    case MDB_ADDR:
-        sprintf(string, "%d",config.params.mdb_address);
-        break;
-    case MDB_BITRATE:
-        sprintf(string, "%d",bitrate_array[bitrate_array_pointer]*100);
-        break;
-    }
-    LCD_set_xy(align_text_right(string, Font_7x10)-1,14);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-
-    switch (navigation_style) {
-    case MENU_NAVIGATION:
-        if(reinit_uart){
-            reinit_uart = 0;
-            config.params.mdb_bitrate = (uint16_t)bitrate_array[bitrate_array_pointer];
-            uart_init(config.params.mdb_bitrate, 8, 1, PARITY_NONE, 10000, UART_CONN_LOST_TIMEOUT);
-        }
-
-        sprintf(string, "<назад");
-        LCD_set_xy(0,0);
-        LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-        LCD_invert_area(0,0,42,11);
-
-        switch (selectedMenuItem->Page) {
-        case MDB_ADDR:
-        case MDB_BITRATE:
-            sprintf(string, "изменить>");
-            LCD_set_xy(align_text_right(string,Font_7x10),0);
-            LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-            LCD_invert_area(62,0,127,11);
-
-            if(pressed_time[BUTTON_RIGHT].pressed > navigation_task_period){
-                while(pressed_time[BUTTON_RIGHT].last_state == BUTTON_PRESSED){
-                }
-                navigation_style = DIGIT_EDIT;
-                switch (selectedMenuItem->Page) {
-                case MDB_ADDR:
-                    edit_val.digit_max = 2;
-                    edit_val.digit = 0;
-                    edit_val.val_min = 0;
-                    edit_val.val_max = 255;
-                    edit_val.p_val = &config.params.mdb_address;
-                    break;
-                case MDB_BITRATE:
-                    edit_val.digit_max = 0;
-                    edit_val.digit = 0;
-                    edit_val.val_min = 0;
-                    edit_val.val_max = 13;
-                    edit_val.p_val = &bitrate_array_pointer;
-                    break;
-                }
-            }
-        }
-        break;
-    case DIGIT_EDIT:
-        reinit_uart = 1;
-
-        sprintf(string, "*ввод");
-        LCD_set_xy(align_text_center(string, Font_7x10),0);
-        LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-        LCD_invert_area(46,0,82,11);
-
-        switch (selectedMenuItem->Page) {
-        case MDB_BITRATE:
-            sprintf(string,"%d",bitrate_array[bitrate_array_pointer]*100);
-            LCD_invert_area(126 - (uint8_t)strlen(string)*Font_7x10.FontWidth,27,126,38);
-            break;
-        default:
-            LCD_invert_area(127-(edit_val.digit+1)*Font_7x10.FontWidth,27,126-edit_val.digit*Font_7x10.FontWidth,38);
-        }
-        break;
-    }
-}*/
-/*static void display_print(void){
-    static uint8_t reinit_backlight = 0;
-    char string[100];
-    menuItem* temp = selectedMenuItem->Parent;
-    sprintf(string, temp->Text);
-    LCD_set_xy(align_text_center(string,Font_7x10),52);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    LCD_invert_area(0,53,127,63);
-
-    sprintf(string, selectedMenuItem->Text);
-    LCD_set_xy(1,26);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    switch (selectedMenuItem->Page) {
-    case LIGHT_LVL:
-        sprintf(string, "%d%%",LCD.backlight_lvl*10);
-        break;
-    case AUTO_OFF:
-        if(LCD.auto_off == 0){
-            sprintf(string, "выкл");
-        }else{
-            sprintf(string, "%dсек",LCD.auto_off*10);
-        }
-        break;
-    }
-    LCD_set_xy(align_text_right(string, Font_7x10)-1,26);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    LCD_invert_area(0,26,127,39);
-    LCD_invert_area(1,27,126,38);
-
-    temp = selectedMenuItem->Next;
-    sprintf(string, temp->Text);
-    LCD_set_xy(1,14);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    switch (temp->Page) {
-    case LIGHT_LVL:
-        sprintf(string, "%d%%",LCD.backlight_lvl*10);
-        break;
-    case AUTO_OFF:
-        if(LCD.auto_off == 0){
-            sprintf(string, "выкл");
-        }else{
-            sprintf(string, "%dсек",LCD.auto_off*10);
-        }
-        break;
-    }
-    LCD_set_xy(align_text_right(string, Font_7x10)-1,14);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-
-    switch (navigation_style) {
-    case MENU_NAVIGATION:
-        if(reinit_backlight == 1){
-            reinit_backlight = 0;
-            config.params.lcd_backlight_lvl = LCD.backlight_lvl;
-            config.params.lcd_backlight_time = LCD.auto_off;
-        }
-
-        sprintf(string, "<назад   изменить>");
-        LCD_set_xy(0,0);
-        LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-        LCD_invert_area(0,0,42,11);
-        LCD_invert_area(62,0,127,11);
-
-        if(pressed_time[BUTTON_RIGHT].pressed > navigation_task_period){
-            while(pressed_time[BUTTON_RIGHT].last_state == BUTTON_PRESSED){
-            }
-            navigation_style = DIGIT_EDIT;
-            switch (selectedMenuItem->Page) {
-            case LIGHT_LVL:
-                edit_val.digit_max = 1;
-                edit_val.digit = 0;
-                edit_val.val_min = 0;
-                edit_val.val_max = 10;
-                edit_val.p_val = &LCD.backlight_lvl;
-                break;
-            case AUTO_OFF:
-                edit_val.digit_max = 1;
-                edit_val.digit = 0;
-                edit_val.val_min = 0;
-                edit_val.val_max = 60;
-                edit_val.p_val = &LCD.auto_off;
-                break;
-            default:
-                break;
-            }
-        }
-        break;
-    case DIGIT_EDIT:
-
-        reinit_backlight = 1;
-
-        sprintf(string, "*ввод");
-        LCD_set_xy(align_text_center(string, Font_7x10),0);
-        LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-        LCD_invert_area(46,0,82,11);
-
-        switch (selectedMenuItem->Page) {
-        case LIGHT_LVL:
-            LCD_backlight_timer_init();
-            LCD_backlight_on();
-            LCD_invert_area(113-(edit_val.digit+1)*Font_7x10.FontWidth,27,112-edit_val.digit*Font_7x10.FontWidth,38);
-            break;
-        case AUTO_OFF:
-            LCD_invert_area(99-(edit_val.digit+1)*Font_7x10.FontWidth,27,98-edit_val.digit*Font_7x10.FontWidth,38);
-            break;
-        }
-        break;
-    }
-}*/
-
-
-static void save_page_print (u8 tick){
-    char string[50];
-
-#if(DISP == LCD_DISP)
-    /*LCD_fill_area(5,30,123,58,LCD_COLOR_BLACK);
-    LCD_fill_area(6,31,122,57,LCD_COLOR_WHITE);
-    sprintf(string, "СОХРАНЕНИЕ НОВЫХ");
-    LCD_set_xy(align_text_center(string, Font_7x10),42);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    sprintf(string, "КОЭФФИЦИЕНТОВ");
-    LCD_set_xy(align_text_center(string, Font_7x10),32);
-    LCD_print(string,&Font_7x10,LCD_COLOR_BLACK);
-    LCD_set_xy(55,6);
-    //LCD_print_char(1,&Icon_16x16,LCD_COLOR_BLACK);
-    switch(tick%4){
-    case 0:
-        LCD_fill_area(55,10,71,22,LCD_COLOR_WHITE);
-        break;
-    case 1:
-        LCD_fill_area(55,14,71,22,LCD_COLOR_WHITE);
-        break;
-    case 2:
-        LCD_fill_area(55,18,71,22,LCD_COLOR_WHITE);
-        break;
-    }*/
-#elif(DISP == ST7735_DISP)
-    st7735_fill_rect(5,30,118,28,ST7735_BLACK);
-    st7735_fill_rect(6,31,116,26,ST7735_WHITE);
-    sprintf(string, "СОХРАНЕНИЕ НОВЫХ");
-    st7735_xy(align_text_center(string, Font_7x10),42);
-    st7735_print(string,&Font_7x10,ST7735_BLACK);
-    sprintf(string, "КОЭФФИЦИЕНТОВ");
-    st7735_xy(align_text_center(string, Font_7x10),32);
-    st7735_print(string,&Font_7x10,ST7735_BLACK);
-    st7735_xy(55,6);
-    st7735_print(1,&Icon_16x16,ST7735_BLACK);
-    switch(tick%4){
-    case 0:
-        st7735_fill_rect(55,10,16,12,ST7735_BLACK);
-        break;
-    case 1:
-        st7735_fill_rect(55,14,16,8,ST7735_BLACK);
-        break;
-    case 2:
-        st7735_fill_rect(55,18,16,4,ST7735_BLACK);
-        break;
-    }
-#endif // DISP
-}
-
 
 /**
  * @brief am2302_task
@@ -2689,7 +1494,7 @@ static int channel_PWM_timer_init(u8 channel){
     __HAL_RCC_TIM2_CLK_ENABLE();
     __HAL_RCC_TIM3_CLK_ENABLE();
 
-    if(input_ch[channel].pwm_tim == TIM3){
+    if(ch_config[channel].pwm_tim == TIM3){
         htim3.Instance = TIM3;
         htim3.Init.Prescaler = 719;
         htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -2734,13 +1539,13 @@ static int channel_PWM_duty_set(u8 channel, float duty){
     int result = 0;
     TIM_OC_InitTypeDef sConfigOC = {0};
 
-    if(input_ch[channel].pwm_tim == TIM3){
+    if(ch_config[channel].pwm_tim == TIM3){
         htim3.Instance = TIM3;
         sConfigOC.OCMode = TIM_OCMODE_PWM1;
         sConfigOC.Pulse = (uint16_t)(duty * 20.0f);
         sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
         sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-        if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, input_ch[channel].pwm_channel) != HAL_OK)
+        if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, ch_config[channel].pwm_channel) != HAL_OK)
         {
           result = -1;
         }
@@ -3132,42 +1937,42 @@ static void channels_init(void){
         HAL_GPIO_Init (do_ch[i].port, &GPIO_InitStruct);
     }
     for(u8 i = 0; i < IN_CHANNEL_NUM; i++){
-        switch (input_ch[i].mode){
-        case CH_MODE_ADC:
+        switch (*ch_config[i].mode){
+        case CH_MODE_AI_VLT:
             GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
             GPIO_InitStruct.Pull = GPIO_NOPULL;
-            GPIO_InitStruct.Pin = input_ch[i].pin;
-            HAL_GPIO_Init(input_ch[i].port, &GPIO_InitStruct);
+            GPIO_InitStruct.Pin = ch_config[i].pin;
+            HAL_GPIO_Init(ch_config[i].port, &GPIO_InitStruct);
             break;
-        case CH_MODE_DI:
+        case CH_MODE_DI_DRY:
             GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
             GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-            GPIO_InitStruct.Pin = input_ch[i].pin;
-            HAL_GPIO_Init(input_ch[i].port, &GPIO_InitStruct);
+            GPIO_InitStruct.Pin = ch_config[i].pin;
+            HAL_GPIO_Init(ch_config[i].port, &GPIO_InitStruct);
             break;
         case CH_MODE_DO:
             GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
             GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-            GPIO_InitStruct.Pin = input_ch[i].pin;
-            HAL_GPIO_Init(input_ch[i].port, &GPIO_InitStruct);
+            GPIO_InitStruct.Pin = ch_config[i].pin;
+            HAL_GPIO_Init(ch_config[i].port, &GPIO_InitStruct);
             break;
         case CH_MODE_AM3202:
             GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
             GPIO_InitStruct.Pull = GPIO_PULLUP;
-            GPIO_InitStruct.Pin = input_ch[i].pin;
-            HAL_GPIO_Init(input_ch[i].port, &GPIO_InitStruct);
+            GPIO_InitStruct.Pin = ch_config[i].pin;
+            HAL_GPIO_Init(ch_config[i].port, &GPIO_InitStruct);
             break;
         case CH_MODE_PWM:
             GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
             GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-            GPIO_InitStruct.Pin = input_ch[i].pin;
-            HAL_GPIO_Init(input_ch[i].port, &GPIO_InitStruct);
+            GPIO_InitStruct.Pin = ch_config[i].pin;
+            HAL_GPIO_Init(ch_config[i].port, &GPIO_InitStruct);
             break;
         case CH_MODE_DS18B20:
             GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
             GPIO_InitStruct.Pull = GPIO_NOPULL;
-            GPIO_InitStruct.Pin = input_ch[i].pin;
-            HAL_GPIO_Init(input_ch[i].port, &GPIO_InitStruct);
+            GPIO_InitStruct.Pin = ch_config[i].pin;
+            HAL_GPIO_Init(ch_config[i].port, &GPIO_InitStruct);
             break;
         default:
             ;

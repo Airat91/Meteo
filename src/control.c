@@ -40,7 +40,6 @@
  */
 #ifndef CONTROL_C
 #define CONTROL_C 1
-#include "main.h"
 #include "control.h"
 #include "cmsis_os.h"
 //#include "usbd_cdc_if.h"
@@ -131,10 +130,12 @@ extern RTC_HandleTypeDef hrtc;
 extern ADC_HandleTypeDef hadc1;
 void control_task( const void *parameters){
     (void) parameters;
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    /*GPIO_InitTypeDef GPIO_InitStruct = {0};
     static tmpr_proc_t sem_temp = TMPR_HEATING;
-    static tmpr_proc_t floor_temp = TMPR_HEATING;
-
+    static tmpr_proc_t floor_temp = TMPR_HEATING;*/
+    for(u8 i = 0; i < CH_NUM; i++){
+        init_channel(i, *ch_config[i].mode);
+    }
     u32 tick=0;
     /*pid_in_t in;
     pid_var_t var;
@@ -396,6 +397,50 @@ static float ntc_tmpr_calc(float volt){
 #define C   -70.672f
 #define D   83.718f
     result = A*volt*volt*volt + B*volt*volt + C*volt + D;
+    return result;
+}
+
+int init_channel(u8 ch, ch_mode_t mode){
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    int result = 0;
+    switch (mode) {
+    case CH_MODE_AI_VLT:
+        GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        break;
+    case CH_MODE_DI_DRY:
+        GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+        GPIO_InitStruct.Pull = GPIO_PULLUP;
+        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+        break;
+    case CH_MODE_DO:
+        GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+        GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+        break;
+    case CH_MODE_AM3202:
+        GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+        GPIO_InitStruct.Pull = GPIO_PULLUP;
+        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+        break;
+    case CH_MODE_PWM:
+        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+        break;
+    case CH_MODE_DS18B20:
+        GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        break;
+    default:
+        GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        result = -1;
+        break;
+    }
+    GPIO_InitStruct.Pin = ch_config[ch].pin;
+    HAL_GPIO_Init (ch_config[ch].port, &GPIO_InitStruct);
+
     return result;
 }
 

@@ -41,8 +41,9 @@
 #define FONT_5x7    1
 #define FONT_7x10    1
 #define FONT_11x18    0
-#define FONT_16x26    0
+#define FONT_16x26    1
 #define FONT_16x16_ICONS    1
+#define BRIC_QUADRO    0
 
 /**
  * @defgroup FONTS
@@ -123,5 +124,8 @@ extern FontDef_t Font_16x26;
  * @ingroup FONTS
  */
 extern const uint16_t Font16x26[];
+
+extern const uint8_t bric_quadro[];
+extern FontDef_t Logo_bric;
 
 #endif
