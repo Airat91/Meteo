@@ -80,6 +80,7 @@ static int get_param_value(char* string, menu_page_t page);
 static void set_edit_value(menu_page_t page);
 static void save_params(void);
 static brick_t get_brick_coord(u8 ind);
+
 static const char off_on_descr[2][10] = {
     "Выкл.",
     "Вкл.",
@@ -104,13 +105,13 @@ const char skin_descr[3][20]={
     {"Темпер"},
 };
 static const char ch_mode_descr[7][10] = {
-    "Неактивен",
-    "Аналоговый",
-    "Дис. вход",
-    "Дис. выход",
+    "Неакт",
+    "Аналог",
+    "Д вх",
+    "Д вых",
     "AM2302",
-    "ШИМ-выход",
-    "DS18B20",
+    "ШИМ",
+    "DS18",
 };
 /*enum menu_page_t {
     PAGE_CLOCK,
@@ -1157,7 +1158,7 @@ static int get_param_value(char* string, menu_page_t page){
     case CH_1_DO_STATE_PAGE:
     case CH_2_DO_STATE_PAGE:
     case CH_3_DO_STATE_PAGE:
-        pos = (uint8_t)((page - CH_0_DO_STATE_PAGE)/(CH_1_DO_STATE_PAGE - CH_0_DO_STATE_PAGE));
+        pos = (uint8_t)((page - CH_0_DO_STATE_PAGE)/(CH_1_DO_STATE_PAGE - CH_0_DO_STATE_PAGE)*(CH_1_OUT - CH_0_OUT)+CH_0_OUT);
         sprintf(string, "%s", off_on_descr[dcts_rele[pos].state.control]);
         if(dcts_rele[pos].state.control_by_act == 1){
             result = -3;
@@ -1167,21 +1168,21 @@ static int get_param_value(char* string, menu_page_t page){
     case CH_1_DO_CTRL_PAGE:
     case CH_2_DO_CTRL_PAGE:
     case CH_3_DO_CTRL_PAGE:
-        pos = (uint8_t)((page - CH_0_DO_CTRL_PAGE)/(CH_1_DO_CTRL_PAGE - CH_0_DO_CTRL_PAGE));
+        pos = (uint8_t)((page - CH_0_DO_CTRL_PAGE)/(CH_1_DO_CTRL_PAGE - CH_0_DO_CTRL_PAGE)*(CH_1_OUT - CH_0_OUT)+CH_0_OUT);
         sprintf(string, "%s", manual_auto_descr[dcts_rele[pos].state.control_by_act]);
         break;
     case CH_0_PWM_DUTY_PAGE:
     case CH_1_PWM_DUTY_PAGE:
     case CH_2_PWM_DUTY_PAGE:
     case CH_3_PWM_DUTY_PAGE:
-        pos = (uint8_t)((page - CH_0_PWM_DUTY_PAGE)/(CH_1_PWM_DUTY_PAGE - CH_0_PWM_DUTY_PAGE));
+        pos = (uint8_t)((page - CH_0_PWM_DUTY_PAGE)/(CH_1_PWM_DUTY_PAGE - CH_0_PWM_DUTY_PAGE)*(CH_1_PWM - CH_0_PWM)+CH_0_PWM);
         sprintf(string, "%.1f%s", (double)dcts_act[pos].set_value, dcts_act[pos].unit_cyr);
         break;
     case CH_0_PWM_CTRL_PAGE:
     case CH_1_PWM_CTRL_PAGE:
     case CH_2_PWM_CTRL_PAGE:
     case CH_3_PWM_CTRL_PAGE:
-        pos = (uint8_t)((page - CH_0_PWM_CTRL_PAGE)/(CH_1_PWM_CTRL_PAGE - CH_0_PWM_CTRL_PAGE));
+        pos = (uint8_t)((page - CH_0_PWM_CTRL_PAGE)/(CH_1_PWM_CTRL_PAGE - CH_0_PWM_CTRL_PAGE)*(CH_1_PWM - CH_0_PWM)+CH_0_PWM);
         sprintf(string, "%s", off_on_descr[dcts_act[pos].state.control]);
         break;
     case CH_0_TMPR_PAGE:
@@ -1237,7 +1238,7 @@ static int get_param_value(char* string, menu_page_t page){
     case CH_2_CNT_PAGE:
     case CH_3_CNT_PAGE:
         pos = (uint8_t)((page - CH_0_CNT_PAGE)/(CH_1_CNT_PAGE - CH_0_CNT_PAGE)*(CH_1_CNT - CH_0_CNT)+CH_0_CNT);
-        sprintf(string, "%.1f", (double)dcts_meas[pos].value);
+        sprintf(string, "%.0f", (double)dcts_meas[pos].value);
         if(dcts_meas[pos].valid == 1){
             result = -1;
         }else{
@@ -1290,6 +1291,32 @@ static int get_param_value(char* string, menu_page_t page){
         }
         break;*/
 
+    case MDB_ADDR:
+        sprintf(string, "%d", config.params.mdb_address);
+        break;
+    case MDB_BITRATE:
+        config.params.mdb_bitrate = (uint16_t)bitrate_array[bitrate_array_pointer];
+        sprintf(string, "%d", config.params.mdb_bitrate*100);
+        break;
+    case MDB_RECIEVED:
+        sprintf(string, "%d", uart_1.recieved_cnt);
+        break;
+    case MDB_SENT:
+        sprintf(string, "%d", uart_1.send_cnt);
+        break;
+    case MDB_OVERRUN_ERR:
+        sprintf(string, "%d", uart_1.overrun_err_cnt);
+        break;
+    case MDB_PARITY_ERR:
+        sprintf(string, "%d", uart_1.parity_err_cnt);
+        break;
+    case MDB_FRAME_ERR:
+        sprintf(string, "%d", uart_1.frame_err_cnt);
+        break;
+    case MDB_NOISE_ERR:
+        sprintf(string, "%d", uart_1.noise_err_cnt);
+        break;
+
     case LIGHT_LVL:
         sprintf(string, "%d%%", config.params.lcd_backlight_lvl);
         SSD1306_SET_LIGHTLEVEL(config.params.lcd_backlight_lvl*255/100);
@@ -1323,7 +1350,104 @@ static int get_param_value(char* string, menu_page_t page){
 }
 
 static void set_edit_value(menu_page_t page){
+    uint8_t pos = 0;
     switch(page){
+    case CH_0_MODE_PAGE:
+    case CH_1_MODE_PAGE:
+    case CH_2_MODE_PAGE:
+    case CH_3_MODE_PAGE:
+        pos = (uint8_t)((page - CH_0_MODE_PAGE)/(CH_1_MODE_PAGE - CH_0_MODE_PAGE));
+        edit_val.type = VAL_UINT8;
+        edit_val.digit_max = 0;
+        edit_val.digit_min = 0;
+        edit_val.digit = 0;
+        edit_val.val_min.uint8 = 0;
+        edit_val.val_max.uint8 = 6;
+        edit_val.p_val.p_uint8 = &config.params.ch_mode[pos];
+        edit_val.select_shift = 0;
+        edit_val.select_width = Font_7x10.FontWidth*6;
+        break;
+
+    case CH_0_DO_STATE_PAGE:
+    case CH_1_DO_STATE_PAGE:
+    case CH_2_DO_STATE_PAGE:
+    case CH_3_DO_STATE_PAGE:
+        pos = (uint8_t)((page - CH_0_DO_STATE_PAGE)/(CH_1_DO_STATE_PAGE - CH_0_DO_STATE_PAGE)*(CH_1_OUT - CH_0_OUT)+CH_0_OUT);
+        edit_val.type = VAL_UINT8;
+        edit_val.digit_max = 0;
+        edit_val.digit_min = 0;
+        edit_val.digit = 0;
+        edit_val.val_min.uint8 = 0;
+        edit_val.val_max.uint8 = 1;
+        edit_val.p_val.p_uint8 = &dcts_rele[pos].state.control;
+        edit_val.select_shift = 0;
+        edit_val.select_width = Font_7x10.FontWidth*5;
+        break;
+
+    case CH_0_DO_CTRL_PAGE:
+    case CH_1_DO_CTRL_PAGE:
+    case CH_2_DO_CTRL_PAGE:
+    case CH_3_DO_CTRL_PAGE:
+        pos = (uint8_t)((page - CH_0_DO_CTRL_PAGE)/(CH_1_DO_CTRL_PAGE - CH_0_DO_CTRL_PAGE)*(CH_1_OUT - CH_0_OUT)+CH_0_OUT);
+        edit_val.type = VAL_UINT8;
+        edit_val.digit_max = 0;
+        edit_val.digit_min = 0;
+        edit_val.digit = 0;
+        edit_val.val_min.uint8 = 0;
+        edit_val.val_max.uint8 = 1;
+        edit_val.p_val.p_uint8 = &dcts_rele[pos].state.control_by_act;
+        edit_val.select_shift = 0;
+        edit_val.select_width = Font_7x10.FontWidth*6;
+        break;
+
+    case CH_0_PWM_DUTY_PAGE:
+    case CH_1_PWM_DUTY_PAGE:
+    case CH_2_PWM_DUTY_PAGE:
+    case CH_3_PWM_DUTY_PAGE:
+        pos = (uint8_t)((page - CH_0_PWM_DUTY_PAGE)/(CH_1_PWM_DUTY_PAGE - CH_0_PWM_DUTY_PAGE)*(CH_1_PWM - CH_0_PWM)+CH_0_PWM);
+        edit_val.type = VAL_FLOAT;
+        edit_val.digit_max = 1;
+        edit_val.digit_min = -1;
+        edit_val.digit = 0;
+        edit_val.val_min.vfloat = 0.0;
+        edit_val.val_max.vfloat = 95.0;
+        edit_val.p_val.p_float = &dcts_act[pos].set_value;
+        edit_val.select_shift = 3;
+        edit_val.select_width = Font_7x10.FontWidth;
+        break;
+
+    case CH_0_PWM_CTRL_PAGE:
+    case CH_1_PWM_CTRL_PAGE:
+    case CH_2_PWM_CTRL_PAGE:
+    case CH_3_PWM_CTRL_PAGE:
+        pos = (uint8_t)((page - CH_0_PWM_CTRL_PAGE)/(CH_1_PWM_CTRL_PAGE - CH_0_PWM_CTRL_PAGE)*(CH_1_PWM - CH_0_PWM)+CH_0_PWM);
+        edit_val.type = VAL_UINT8;
+        edit_val.digit_max = 0;
+        edit_val.digit_min = 0;
+        edit_val.digit = 0;
+        edit_val.val_min.uint8 = 0;
+        edit_val.val_max.uint8 = 1;
+        edit_val.p_val.p_uint8 = &dcts_act[pos].state.control;
+        edit_val.select_shift = 0;
+        edit_val.select_width = Font_7x10.FontWidth*5;
+        break;
+
+    case CH_0_CNT_PAGE:
+    case CH_1_CNT_PAGE:
+    case CH_2_CNT_PAGE:
+    case CH_3_CNT_PAGE:
+        pos = (uint8_t)((page - CH_0_CNT_PAGE)/(CH_1_CNT_PAGE - CH_0_CNT_PAGE)*(CH_1_CNT - CH_0_CNT)+CH_0_CNT);
+        edit_val.type = VAL_FLOAT;
+        edit_val.digit_max = 5;
+        edit_val.digit_min = 0;
+        edit_val.digit = 0;
+        edit_val.val_min.vfloat = 0.0;
+        edit_val.val_max.vfloat = 999999.0;
+        edit_val.p_val.p_float = &dcts_meas[pos].value;
+        edit_val.select_shift = 0;
+        edit_val.select_width = Font_7x10.FontWidth;
+        break;
+
     /*case ACT_EN_0:
         edit_val.type = VAL_UINT8;
         edit_val.digit_max = 0;
@@ -1438,6 +1562,30 @@ static void set_edit_value(menu_page_t page){
             edit_val.select_width = Font_7x10.FontWidth*5;
         }
         break;*/
+    case MDB_ADDR:
+        edit_val.type = VAL_UINT16;
+        edit_val.digit_max = 2;
+        edit_val.digit_min = 0;
+        edit_val.digit = 0;
+        edit_val.val_min.uint16 = 1;
+        edit_val.val_max.uint16 = 254;
+        edit_val.p_val.p_uint16 = &config.params.mdb_address;
+        edit_val.select_shift = 0;
+        edit_val.select_width = Font_7x10.FontWidth;
+        break;
+
+    case MDB_BITRATE:
+        edit_val.type = VAL_UINT16;
+        edit_val.digit_max = 1;
+        edit_val.digit_min = 0;
+        edit_val.digit = 0;
+        edit_val.val_min.uint16 = 0;
+        edit_val.val_max.uint16 = 13;
+        edit_val.p_val.p_uint16 = &bitrate_array_pointer;
+        edit_val.select_shift = 0;
+        edit_val.select_width = Font_7x10.FontWidth*6;
+        break;
+
     case LIGHT_LVL:
         edit_val.type = VAL_UINT16;
         edit_val.digit_max = 2;

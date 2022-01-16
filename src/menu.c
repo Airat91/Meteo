@@ -42,8 +42,8 @@ MAKE_MENU       (main_page,     NULL_ENTRY,     NULL_ENTRY,     NULL_ENTRY,     
     MAKE_MENU   (vref,          vbat,           self_hum,       meas_channels,  NULL_ENTRY,     0,          SELF_VREF,          "Опорное напр. В");
     MAKE_MENU   (vbat,          self_tmpr,      vref,           meas_channels,  NULL_ENTRY,     0,          SELF_VBAT,          "Батарейка В");
   MAKE_MENU     (ch_0_page,     ch_1_page,      meas_channels,  main_page,      ch_0_mode,      11,         CH_0_PAGE,          "Канал 0");
-    MAKE_MENU   (ch_0_mode,     ch_0_do_st,     ch_0_di_st,     ch_0_page,      EDITED_VAL,     0,          CH_0_MODE_PAGE,     "Режим");
-    MAKE_MENU   (ch_0_do_st,    ch_0_do_strl,   ch_0_mode,      ch_0_page,      NULL_ENTRY,     0,          CH_0_DO_STATE_PAGE, "DO сост.");
+    MAKE_MENU   (ch_0_mode,     ch_0_do_st,     ch_0_di_st,     ch_0_page,      EDITED_VAL,     0,          CH_0_MODE_PAGE,     "Режим работы");
+    MAKE_MENU   (ch_0_do_st,    ch_0_do_strl,   ch_0_mode,      ch_0_page,      EDITED_VAL,     0,          CH_0_DO_STATE_PAGE, "DO сост.");
     MAKE_MENU   (ch_0_do_strl,  ch_0_pwm_duty,  ch_0_do_st,     ch_0_page,      EDITED_VAL,     0,          CH_0_DO_CTRL_PAGE,  "DO упр.");
     MAKE_MENU   (ch_0_pwm_duty, ch_0_pwm_ctrl,  ch_0_do_strl,   ch_0_page,      EDITED_VAL,     0,          CH_0_PWM_DUTY_PAGE, "ШИМ скв-ть");
     MAKE_MENU   (ch_0_pwm_ctrl, ch_0_tmpr,      ch_0_pwm_duty,  ch_0_page,      EDITED_VAL,     0,          CH_0_PWM_CTRL_PAGE, "ШИМ упр.");
@@ -54,8 +54,8 @@ MAKE_MENU       (main_page,     NULL_ENTRY,     NULL_ENTRY,     NULL_ENTRY,     
     MAKE_MENU   (ch_0_cnt,      ch_0_di_st,     ch_0_vlt,       ch_0_page,      EDITED_VAL,     0,          CH_0_CNT_PAGE,      "Счетчик");
     MAKE_MENU   (ch_0_di_st,    ch_0_mode,      ch_0_cnt,       ch_0_page,      NULL_ENTRY,     0,          CH_0_DI_STATE_PAGE, "DI сост.");
   MAKE_MENU     (ch_1_page,     ch_2_page,      ch_0_page,      main_page,      ch_1_mode,      11,         CH_1_PAGE,          "Канал 1");
-    MAKE_MENU   (ch_1_mode,     ch_1_do_st,     ch_1_di_st,     ch_1_page,      EDITED_VAL,     0,          CH_1_MODE_PAGE,     "Режим");
-    MAKE_MENU   (ch_1_do_st,    ch_1_do_strl,   ch_1_mode,      ch_1_page,      NULL_ENTRY,     0,          CH_1_DO_STATE_PAGE, "DO сост.");
+    MAKE_MENU   (ch_1_mode,     ch_1_do_st,     ch_1_di_st,     ch_1_page,      EDITED_VAL,     0,          CH_1_MODE_PAGE,     "Режим работы");
+    MAKE_MENU   (ch_1_do_st,    ch_1_do_strl,   ch_1_mode,      ch_1_page,      EDITED_VAL,     0,          CH_1_DO_STATE_PAGE, "DO сост.");
     MAKE_MENU   (ch_1_do_strl,  ch_1_pwm_duty,  ch_1_do_st,     ch_1_page,      EDITED_VAL,     0,          CH_1_DO_CTRL_PAGE,  "DO упр.");
     MAKE_MENU   (ch_1_pwm_duty, ch_1_pwm_ctrl,  ch_1_do_strl,   ch_1_page,      EDITED_VAL,     0,          CH_1_PWM_DUTY_PAGE, "ШИМ скв-ть");
     MAKE_MENU   (ch_1_pwm_ctrl, ch_1_tmpr,      ch_1_pwm_duty,  ch_1_page,      EDITED_VAL,     0,          CH_1_PWM_CTRL_PAGE, "ШИМ упр.");
@@ -66,8 +66,8 @@ MAKE_MENU       (main_page,     NULL_ENTRY,     NULL_ENTRY,     NULL_ENTRY,     
     MAKE_MENU   (ch_1_cnt,      ch_1_di_st,     ch_1_vlt,       ch_1_page,      EDITED_VAL,     0,          CH_1_CNT_PAGE,      "Счетчик");
     MAKE_MENU   (ch_1_di_st,    ch_1_mode,      ch_1_cnt,       ch_1_page,      NULL_ENTRY,     0,          CH_1_DI_STATE_PAGE, "DI сост.");
   MAKE_MENU     (ch_2_page,     ch_3_page,      ch_1_page,      main_page,      ch_2_mode,      11,         CH_2_PAGE,          "Канал 2");
-    MAKE_MENU   (ch_2_mode,     ch_2_do_st,     ch_2_di_st,     ch_2_page,      EDITED_VAL,     0,          CH_2_MODE_PAGE,     "Режим");
-    MAKE_MENU   (ch_2_do_st,    ch_2_do_strl,   ch_2_mode,      ch_2_page,      NULL_ENTRY,     0,          CH_2_DO_STATE_PAGE, "DO сост.");
+    MAKE_MENU   (ch_2_mode,     ch_2_do_st,     ch_2_di_st,     ch_2_page,      EDITED_VAL,     0,          CH_2_MODE_PAGE,     "Режим работы");
+    MAKE_MENU   (ch_2_do_st,    ch_2_do_strl,   ch_2_mode,      ch_2_page,      EDITED_VAL,     0,          CH_2_DO_STATE_PAGE, "DO сост.");
     MAKE_MENU   (ch_2_do_strl,  ch_2_pwm_duty,  ch_2_do_st,     ch_2_page,      EDITED_VAL,     0,          CH_2_DO_CTRL_PAGE,  "DO упр.");
     MAKE_MENU   (ch_2_pwm_duty, ch_2_pwm_ctrl,  ch_2_do_strl,   ch_2_page,      EDITED_VAL,     0,          CH_2_PWM_DUTY_PAGE, "ШИМ скв-ть");
     MAKE_MENU   (ch_2_pwm_ctrl, ch_2_tmpr,      ch_2_pwm_duty,  ch_2_page,      EDITED_VAL,     0,          CH_2_PWM_CTRL_PAGE, "ШИМ упр.");
@@ -78,8 +78,8 @@ MAKE_MENU       (main_page,     NULL_ENTRY,     NULL_ENTRY,     NULL_ENTRY,     
     MAKE_MENU   (ch_2_cnt,      ch_2_di_st,     ch_2_vlt,       ch_2_page,      EDITED_VAL,     0,          CH_2_CNT_PAGE,      "Счетчик");
     MAKE_MENU   (ch_2_di_st,    ch_2_mode,      ch_2_cnt,       ch_2_page,      NULL_ENTRY,     0,          CH_2_DI_STATE_PAGE, "DI сост.");
   MAKE_MENU     (ch_3_page,     algoritms,      ch_2_page,      main_page,      ch_3_mode,      11,         CH_3_PAGE,          "Канал 3");
-    MAKE_MENU   (ch_3_mode,     ch_3_do_st,     ch_3_di_st,     ch_3_page,      EDITED_VAL,     0,          CH_3_MODE_PAGE,     "Режим");
-    MAKE_MENU   (ch_3_do_st,    ch_3_do_strl,   ch_3_mode,      ch_3_page,      NULL_ENTRY,     0,          CH_3_DO_STATE_PAGE, "DO сост.");
+    MAKE_MENU   (ch_3_mode,     ch_3_do_st,     ch_3_di_st,     ch_3_page,      EDITED_VAL,     0,          CH_3_MODE_PAGE,     "Режим работы");
+    MAKE_MENU   (ch_3_do_st,    ch_3_do_strl,   ch_3_mode,      ch_3_page,      EDITED_VAL,     0,          CH_3_DO_STATE_PAGE, "DO сост.");
     MAKE_MENU   (ch_3_do_strl,  ch_3_pwm_duty,  ch_3_do_st,     ch_3_page,      EDITED_VAL,     0,          CH_3_DO_CTRL_PAGE,  "DO упр.");
     MAKE_MENU   (ch_3_pwm_duty, ch_3_pwm_ctrl,  ch_3_do_strl,   ch_3_page,      EDITED_VAL,     0,          CH_3_PWM_DUTY_PAGE, "ШИМ скв-ть");
     MAKE_MENU   (ch_3_pwm_ctrl, ch_3_tmpr,      ch_3_pwm_duty,  ch_3_page,      EDITED_VAL,     0,          CH_3_PWM_CTRL_PAGE, "ШИМ упр.");

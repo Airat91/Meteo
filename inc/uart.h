@@ -80,6 +80,8 @@ extern uint8_t uart_buff_received[];
 extern uint8_t uart_buff_in[];
 extern uart_stream_t uart_1;
 extern UART_HandleTypeDef huart1;
+extern const uart_bitrate_t bitrate_array[];
+extern uint16_t bitrate_array_pointer;
 
 /*========== FUNCTION PROTOTYPES ==========*/
 

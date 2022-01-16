@@ -152,13 +152,13 @@
 
  typedef enum {
      CH_0_DSCR_CTRL = 0,
-     CH_0_PWM_CTRL,
+     CH_0_PWM,
      CH_1_DSCR_CTRL,
-     CH_1_PWM_CTRL,
+     CH_1_PWM,
      CH_2_DSCR_CTRL,
-     CH_2_PWM_CTRL,
+     CH_2_PWM,
      CH_3_DSCR_CTRL,
-     CH_3_PWM_CTRL,
+     CH_3_PWM,
  }dcts_act_t;
 
  typedef enum {

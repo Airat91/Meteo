@@ -65,6 +65,7 @@
 #include "uart.h"
 #include "modbus.h"
 #include "time.h"
+#include "display.h"
 //#include "ds18.h"
 
 /**
@@ -136,7 +137,7 @@ static void print_enter_right(void);
 static void print_enter_ok(void);
 static void print_change(void);
 static void save_params(void);
-static void restore_params(void);
+//static void restore_params(void);
 static void save_to_bkp(u8 bkp_num, uint16_t var);
 //static void save_float_to_bkp(u8 bkp_num, float var);
 static uint16_t read_bkp(u8 bkp_num);
@@ -151,23 +152,6 @@ navigation_t navigation_style = MENU_NAVIGATION;
 edit_val_t edit_val = {0};
 saved_to_flash_t config;
 //bkp_data_t * bkp_data_p;
-static const uart_bitrate_t bitrate_array[14] = {
-    BITRATE_600,
-    BITRATE_1200,
-    BITRATE_2400,
-    BITRATE_4800,
-    BITRATE_9600,
-    BITRATE_14400,
-    BITRATE_19200,
-    BITRATE_28800,
-    BITRATE_38400,
-    BITRATE_56000,
-    BITRATE_57600,
-    BITRATE_115200,
-    BITRATE_128000,
-    BITRATE_256000,
-};
-static uint16_t bitrate_array_pointer = 0;
 static const char off_on_descr[2][10] = {
     "Выкл.",
     "Вкл.",
@@ -295,16 +279,16 @@ void dcts_init (void) {
     //act_channels
 
     dcts_act_channel_init(CH_0_DSCR_CTRL,   "CH_0 Rele out",    "Кан_0 Дискр. упр.","",     "");
-    dcts_act_channel_init(CH_0_PWM_CTRL,    "CH_0 PWM out",     "Кан_0 ШИМ упр.",   "%",    "%");
+    dcts_act_channel_init(CH_0_PWM,    "CH_0 PWM out",     "Кан_0 ШИМ упр.",   "%",    "%");
 
     dcts_act_channel_init(CH_1_DSCR_CTRL,   "CH_1 Rele out",    "Кан_1 Дискр. упр.","",     "");
-    dcts_act_channel_init(CH_1_PWM_CTRL,    "CH_1 PWM out",     "Кан_1 ШИМ упр.",   "%",    "%");
+    dcts_act_channel_init(CH_1_PWM,    "CH_1 PWM out",     "Кан_1 ШИМ упр.",   "%",    "%");
 
     dcts_act_channel_init(CH_2_DSCR_CTRL,   "CH_2 Rele out",    "Кан_2 Дискр. упр.","",     "");
-    dcts_act_channel_init(CH_2_PWM_CTRL,    "CH_2 PWM out",     "Кан_2 ШИМ упр.",   "%",    "%");
+    dcts_act_channel_init(CH_2_PWM,    "CH_2 PWM out",     "Кан_2 ШИМ упр.",   "%",    "%");
 
     dcts_act_channel_init(CH_3_DSCR_CTRL,   "CH_3 Rele out",    "Кан_3 Дискр. упр.","",     "");
-    dcts_act_channel_init(CH_3_PWM_CTRL,    "CH_3 PWM out",     "Кан_3 ШИМ упр.",   "%",    "%");
+    dcts_act_channel_init(CH_3_PWM,    "CH_3 PWM out",     "Кан_3 ШИМ упр.",   "%",    "%");
 
     //rele_channels
 
@@ -1772,7 +1756,7 @@ static void save_params(void){
     menuChange(current_menu);
 }
 
-static void restore_params(void){
+/*static void restore_params(void){
     int area_cnt = find_free_area();
     if(area_cnt != 0){
         if(area_cnt == -1){
@@ -1811,7 +1795,7 @@ static void restore_params(void){
             break;
         }
     }
-}
+}*/
 
 static void save_to_bkp(u8 bkp_num, uint16_t var){
     uint32_t data = var;

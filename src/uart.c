@@ -24,6 +24,23 @@ uint8_t uart_buff_received[UART_BUFF_MAX_LEN];
 uint8_t uart_buff_in[UART_BUFF_MAX_LEN];
 UART_HandleTypeDef huart1;
 uart_stream_t uart_1 = {0};
+uint16_t bitrate_array_pointer = 0;
+const uart_bitrate_t bitrate_array[14] = {
+    BITRATE_600,
+    BITRATE_1200,
+    BITRATE_2400,
+    BITRATE_4800,
+    BITRATE_9600,
+    BITRATE_14400,
+    BITRATE_19200,
+    BITRATE_28800,
+    BITRATE_38400,
+    BITRATE_56000,
+    BITRATE_57600,
+    BITRATE_115200,
+    BITRATE_128000,
+    BITRATE_256000,
+};
 
 /*========== FUNCTIONS ==========*/
 
