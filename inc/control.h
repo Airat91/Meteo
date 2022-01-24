@@ -103,6 +103,13 @@ extern semistor_t semistor_state;
 
 
 int init_channel(u8 ch, ch_mode_t mode);
+int ai_vlt_handler(u8 ch);
+int di_dry_handler(u8 ch);
+int do_handler(u8 ch);
+int am2302_handler(u8 ch);
+int pwm_handler(u8 ch);
+int ds18b20_handler(u8 ch);
+
 /*add functions and variable declarations before */
 #ifdef __cplusplus
 }

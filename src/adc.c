@@ -99,6 +99,8 @@ int adc_init (void){
 
     return result;
 }
+
+int adc_channel_add()
 /**
  * @brief Deinit ADC
  * @ingroup ADC

@@ -400,6 +400,13 @@ static float ntc_tmpr_calc(float volt){
     return result;
 }
 
+/**
+ * @brief Init GPIO and etc according channel mode
+ * @param ch = channel number {0..3}
+ * @param mode - see @ch_mode_t
+ * @return  0 - OK,\n
+ *          -1 - unknown mode,
+ */
 int init_channel(u8 ch, ch_mode_t mode){
     __HAL_RCC_GPIOA_CLK_ENABLE();
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -408,11 +415,17 @@ int init_channel(u8 ch, ch_mode_t mode){
     case CH_MODE_AI_VLT:
         GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
+        /** @todo
+         * init ADC channel and injected group
+         */
         break;
     case CH_MODE_DI_DRY:
         GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
         GPIO_InitStruct.Pull = GPIO_PULLUP;
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+        /** @todo
+         * add GPIO interrupt for DI CNT
+         */
         break;
     case CH_MODE_DO:
         GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -427,6 +440,9 @@ int init_channel(u8 ch, ch_mode_t mode){
     case CH_MODE_PWM:
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+        /** @todo
+         * init PWM timer
+         */
         break;
     case CH_MODE_DS18B20:
         GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
@@ -443,6 +459,31 @@ int init_channel(u8 ch, ch_mode_t mode){
 
     return result;
 }
+
+int ai_vlt_handler(u8 ch){
+
+}
+
+int di_dry_handler(u8 ch){
+
+}
+
+int do_handler(u8 ch){
+
+}
+
+int am2302_handler(u8 ch){
+
+}
+
+int pwm_handler(u8 ch){
+
+}
+
+int ds18b20_handler(u8 ch){
+
+}
+
 
 
 #endif //CONTROL_C
