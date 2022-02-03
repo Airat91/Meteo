@@ -465,7 +465,27 @@ int ai_vlt_handler(u8 ch){
 }
 
 int di_dry_handler(u8 ch){
+    int result = 0;
+    u8 di_page = (CH_0_DI + (CH_3_DI - CH_0_DI)*ch);
+    u8 cnt_page = (CH_0_CNT + (CH_3_CNT - CH_0_CNT)*ch);
+    static u8 last_state[CH_NUM];
+    u8 state = (u8)(HAL_GPIO_ReadPin(ch_config[ch].port, ch_config[ch].pin));
+    if(state != last_state[ch]){
+        switch(state){
+        case 0:
+            dcts_meas[di_page].value = 0.0f;
+            dcts_meas[cnt_page].value += 1.0f;
+            break;
+        case 1:
+            dcts_meas[di_page].value = 1.0f;
+            break;
+        }
+        dcts_meas[di_page].valid = 1;
+        dcts_meas[cnt_page].valid = 1;
+        last_state[ch] = state;
+    }
 
+    return result;
 }
 
 int do_handler(u8 ch){
