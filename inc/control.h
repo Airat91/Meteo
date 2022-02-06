@@ -45,6 +45,7 @@
 #include "type_def.h"
 #include "stm32f1xx_hal.h"
 #include "main.h"
+#include "am2302.h"
 /*add includes before */
 #ifdef __cplusplus 
    extern "C" {

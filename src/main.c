@@ -1156,7 +1156,7 @@ void am2302_task (void const * argument){
     uint32_t ch_4_recieved = 0;
     uint32_t ch_4_lost = 0;
     while(1){
-        ch_2 = am2302_get(0);
+        //ch_2 = am2302_get(0);
         taskENTER_CRITICAL();
         /*if(ch_2.error == 1){
             ch_2_lost++;
@@ -1175,7 +1175,7 @@ void am2302_task (void const * argument){
         }*/
         taskEXIT_CRITICAL();
 
-        ch_3 = am2302_get(1);
+        //ch_3 = am2302_get(1);
         taskENTER_CRITICAL();
         /*if(ch_3.error == 1){
             ch_3_lost++;
@@ -1194,7 +1194,7 @@ void am2302_task (void const * argument){
         }*/
         taskEXIT_CRITICAL();
 
-        ch_4 = am2302_get(2);
+        //ch_4 = am2302_get(2);
         taskENTER_CRITICAL();
         /*if(ch_4.error == 1){
             ch_4_lost++;

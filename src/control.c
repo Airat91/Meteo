@@ -122,6 +122,7 @@ void pid(pid_in_t * inputs,pid_var_t * vars,\
                   pid_out_t * outputs);
 static void reg_on_control(void);
 static float ntc_tmpr_calc(float adc_val);
+static int am2302_self_read();
 
 #define DEFAULT_OUT 0.0f
 #define REQUIRE_VALUE 27.0f
@@ -157,6 +158,31 @@ void control_task( const void *parameters){
     in.gist_tube.data.float32 = 0.5f;*/
     uint32_t last_wake_time = osKernelSysTick();
     while(1){
+        for(u8 ch = 0; ch < CH_NUM; ch++){
+            switch (*ch_config[ch].mode){
+            case CH_MODE_AI_VLT:
+                ai_vlt_handler(ch);
+                break;
+            case CH_MODE_DI_DRY:
+                di_dry_handler(ch);
+                break;
+            case CH_MODE_DO:
+                do_handler(ch);
+                break;
+            case CH_MODE_AM3202:
+                am2302_handler(ch);
+                break;
+            case CH_MODE_PWM:
+                pwm_handler(ch);
+                break;
+            case CH_MODE_DS18B20:
+                ds18b20_handler(ch);
+                break;
+            default:
+                break;
+            }
+        }
+        am2302_self_read();
 
         // dcts_act[SEMISTOR]
         /*if(dcts_act[SEMISTOR].state.control){
@@ -493,7 +519,35 @@ int do_handler(u8 ch){
 }
 
 int am2302_handler(u8 ch){
+    int result = 0;
+    u8 tmpr_page = (CH_0_TMPR + (CH_3_TMPR - CH_0_TMPR)*ch);
+    u8 hum_page = (CH_0_HUM + (CH_3_HUM - CH_0_HUM)*ch);
+    static u32 last_read[CH_NUM] = {0};
+    static am2302_data_t data[CH_NUM] = {{0},{0},{0},{0}};
+    u32 unix_time = RTC->CNTL;
+    unix_time |= RTC->CNTH<<16;
+    if(unix_time - last_read[ch] > 180){
+        //read data
+        if(am2302_get(ch_config[ch].port, ch_config[ch].pin, &data[ch]) != 0){
+            data[ch].lost++;
+            data[ch].lost_con_cnt++;
+            if(data[ch].lost_con_cnt > 2){
+                dcts_meas[hum_page].valid = FALSE;
+                dcts_meas[tmpr_page].valid = FALSE;
+            }
+            result = -1;
+        }else{
+            data[ch].recieved++;
+            data[ch].lost_con_cnt = 0;
+            dcts_meas[hum_page].value = (float)data[ch].hum/10;
+            dcts_meas[hum_page].valid = TRUE;
+            dcts_meas[tmpr_page].value = (float)data[ch].tmpr/10;
+            dcts_meas[tmpr_page].valid = TRUE;
+        }
+        last_read[ch] = unix_time;
+    }
 
+    return result;
 }
 
 int pwm_handler(u8 ch){
@@ -502,6 +556,35 @@ int pwm_handler(u8 ch){
 
 int ds18b20_handler(u8 ch){
 
+}
+
+static int am2302_self_read(){
+    int result = 0;
+    static u32 last_read = 0;
+    static am2302_data_t data = {0};
+    u32 unix_time = RTC->CNTL;
+    unix_time |= RTC->CNTH<<16;
+    if(unix_time - last_read > 180){
+        //read data
+        if(am2302_get(AM2302_PORT, AM2302_PIN, &data) != 0){
+            data.lost++;
+            data.lost_con_cnt++;
+            if(data.lost_con_cnt > 2){
+                dcts_meas[HUM_SELF].valid = FALSE;
+                dcts_meas[TMPR_SELF].valid = FALSE;
+            }
+            result = -1;
+        }else{
+            data.recieved++;
+            data.lost_con_cnt = 0;
+            dcts_meas[HUM_SELF].value = (float)data.hum/10;
+            dcts_meas[HUM_SELF].valid = TRUE;
+            dcts_meas[TMPR_SELF].value = (float)data.tmpr/10;
+            dcts_meas[TMPR_SELF].valid = TRUE;
+        }
+        last_read = unix_time;
+    }
+    return result;
 }
 
 
