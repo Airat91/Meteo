@@ -1,5 +1,5 @@
 // Library for AM2302
-// Ver_2.2
+// Ver_2.3
 
 /*========== LIBRARY DESCRIPTION ==========
 - Library use STM32F3xx_HAL_Driver 
@@ -20,6 +20,9 @@ typedef struct {
   int16_t tmpr;
   uint8_t paritet;
   uint8_t error;
+  uint8_t lost_con_cnt;
+  uint32_t recieved;
+  uint32_t lost;
 } am2302_data_t;
 
 /**
@@ -40,8 +43,8 @@ extern const am2302_pin_t am2302_pin[];
 
 int am2302_init (void);
 void am2303_deinit(void);
-am2302_data_t am2302_get (uint8_t channel);
-void am2302_send(am2302_data_t data, uint8_t channel);
-am2302_data_t am2302_get_rtc(uint8_t channel);
+int am2302_get (GPIO_TypeDef* port, uint16_t pin, am2302_data_t* data);
+int am2302_send(GPIO_TypeDef* port, uint16_t pin, am2302_data_t data);
+int am2302_get_rtc(GPIO_TypeDef* port, uint16_t pin, am2302_data_t* data);
 
 #endif /* am2302_H_ */

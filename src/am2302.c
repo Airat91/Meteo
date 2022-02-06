@@ -64,13 +64,18 @@ void am2302_deinit (void){
 
 /**
  * @brief Get value from AM2302
- * @param channel - number of AM2302 channels
- * @return Data in am2302_data_t type
+ * @param port - port of connected pin like GPIOx
+ * @param pin - pin number like GPIO_PIN_x
+ * @param data - pointer to am2302_data_t var
+ * @return  0 - OK,\n
+ *          -1 - Device response timeout error,\n
+ *          -2 - Paritet error,\n
+ *          -3 - Read empty
  * @ingroup am2302
  */
-am2302_data_t am2302_get (uint8_t channel) {
+int am2302_get (GPIO_TypeDef* port, uint16_t pin, am2302_data_t* data) {
     
-    am2302_data_t result = {0};
+    int result = 0;
     uint32_t T = 0;
     uint8_t i = 0;
     uint8_t read_data[5] = {0};
@@ -82,22 +87,22 @@ am2302_data_t am2302_get (uint8_t channel) {
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Pin = am2302_pin[channel].pin;
-    HAL_GPIO_Init (am2302_pin[channel].port, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = pin;
+    HAL_GPIO_Init (port, &GPIO_InitStruct);
 
     // SDA = 0
-    HAL_GPIO_WritePin (am2302_pin[channel].port, am2302_pin[channel].pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin (port, pin, GPIO_PIN_RESET);
 
     // Run timeout 1ms
     //osDelay(1);
     us_tim_delay(1000);
 
     // SDA = 1
-    HAL_GPIO_WritePin (am2302_pin[channel].port, am2302_pin[channel].pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin (port, pin, GPIO_PIN_SET);
 
     // Config AM2032_PIN to INPUT
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    HAL_GPIO_Init (am2302_pin[channel].port, &GPIO_InitStruct);
+    HAL_GPIO_Init (port, &GPIO_InitStruct);
 
     taskENTER_CRITICAL();
 
@@ -105,34 +110,37 @@ am2302_data_t am2302_get (uint8_t channel) {
     current_time = us_tim_get_value();
 
     // Wait SDA->0 or AM2302_TIMEOUT
-    while ((HAL_GPIO_ReadPin(am2302_pin[channel].port, am2302_pin[channel].pin) == 1) &&
+    while ((HAL_GPIO_ReadPin(port, pin) == 1) &&
         (time_left < AM2302_TIMEOUT)) {
         time_left = us_tim_get_value() - current_time;
     }
     if (time_left > AM2302_TIMEOUT) {
-        result.error = 1;
+        data->error = 1;
+        result = -1;    // Device response timeout error
     } else {
        current_time = us_tim_get_value();     // Update current_time
     }
 
     // Wait SDA->1 or AM2302_TIMEOUT
-    while ((HAL_GPIO_ReadPin (am2302_pin[channel].port, am2302_pin[channel].pin) == 0) &&
+    while ((HAL_GPIO_ReadPin (port, pin) == 0) &&
            (time_left < AM2302_TIMEOUT)) {
            time_left = us_tim_get_value() - current_time;
     }
     if (time_left > AM2302_TIMEOUT) {
-        result.error = 1;
+        data->error = 1;
+        result = -1;    // Device response timeout error
     } else {
        current_time = us_tim_get_value();     // Update current_time
     }
   
     // Wait SDA->0 or AM2302_TIMEOUT
-    while ((HAL_GPIO_ReadPin(am2302_pin[channel].port, am2302_pin[channel].pin) == 1) &&
+    while ((HAL_GPIO_ReadPin(port, pin) == 1) &&
            (time_left < AM2302_TIMEOUT)) {
            time_left = us_tim_get_value() - current_time;
     }
     if (time_left > AM2302_TIMEOUT) {
-        result.error = 1;
+        data->error = 1;
+        result = -1;    // Device response timeout error
     } else {
        current_time = us_tim_get_value();     // Update current_time
     }
@@ -142,24 +150,26 @@ am2302_data_t am2302_get (uint8_t channel) {
         for( i = 8; i > 0; i--) {
 
             // Wait SDA->1 or AM2302_TIMEOUT
-            while ((HAL_GPIO_ReadPin (am2302_pin[channel].port, am2302_pin[channel].pin) == 0) &&
+            while ((HAL_GPIO_ReadPin (port, pin) == 0) &&
                    (time_left < AM2302_TIMEOUT)) {
                    time_left = us_tim_get_value() - current_time;
             }
             if (time_left > AM2302_TIMEOUT) {
-                result.error = 1;
+                data->error = 1;
+                result = -1;    // Device response timeout error
             } else {
                current_time = us_tim_get_value();     // Update current_time
                T = time_left;
             }
 
             // Wait SDA->0 or AM2302_TIMEOUT
-            while ((HAL_GPIO_ReadPin(am2302_pin[channel].port, am2302_pin[channel].pin) == 1) &&
+            while ((HAL_GPIO_ReadPin(port, pin) == 1) &&
                    (time_left < AM2302_TIMEOUT)) {
                    time_left = us_tim_get_value() - current_time;
             }
             if (time_left > AM2302_TIMEOUT) {
-                result.error = 1;
+                data->error = 1;
+                result = -1;    // Device response timeout error
             } else {
                current_time = us_tim_get_value();     // Update current_time
                if(time_left > T){
@@ -175,29 +185,34 @@ am2302_data_t am2302_get (uint8_t channel) {
             paritet += read_data[i];
         }
         if(paritet == read_data[4]){
-            result.hum = read_data[0]*256 + read_data[1];
-            result.tmpr = (read_data[2]*256 + read_data[3])&0x7FFF;
+            data->hum = read_data[0]*256 + read_data[1];
+            data->tmpr = (read_data[2]*256 + read_data[3])&0x7FFF;
             if(read_data[2]&0x80){
-                result.tmpr *= -1;
+                data->tmpr *= -1;
             }
-            result.paritet = read_data[4];
+            data->paritet = read_data[4];
         }else{
-            result.error = 1;
+            data->error = 1;
+            result = -2;    // Paritet error
         }
     }else{
-        result.error = 1;
+        data->error = 1;
+        result = -3;        // Read empty
     }
     return result;
 }
 
 /**
  * @brief Send data like AM2302
+ * @param port - port of connected pin like GPIOx
+ * @param pin - pin number like GPIO_PIN_x
  * @param data - struct with data
- * @param channel - channel of AM2302
+ * @return - 0
  * @ingroup am2302
  */
-void am2302_send(am2302_data_t data, uint8_t channel){
+int am2302_send(GPIO_TypeDef* port, uint16_t pin, am2302_data_t data){
 
+    int result = 0;
     uint8_t send_data[5] = {
         (uint8_t)(data.hum >> 8),
         (uint8_t)data.hum,
@@ -220,29 +235,29 @@ void am2302_send(am2302_data_t data, uint8_t channel){
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Pin = am2302_pin[channel].pin;
+    GPIO_InitStruct.Pin = pin;
 
     us_tim_delay(t_bus_release);
 
-    HAL_GPIO_WritePin(am2302_pin[channel].port,am2302_pin[channel].pin, GPIO_PIN_RESET);
-    HAL_GPIO_Init (am2302_pin[channel].port, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(port,pin, GPIO_PIN_RESET);
+    HAL_GPIO_Init (port, &GPIO_InitStruct);
     us_tim_delay(t_response);
 
-    HAL_GPIO_WritePin(am2302_pin[channel].port,am2302_pin[channel].pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(port,pin, GPIO_PIN_SET);
     us_tim_delay(t_response);
 
     // Send data
-    HAL_GPIO_WritePin(am2302_pin[channel].port,am2302_pin[channel].pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(port,pin, GPIO_PIN_RESET);
     for(uint8_t byte = 0; byte < 5; byte++){
         for(uint8_t bit = 0; bit < 8; bit++){
             us_tim_delay(t_low);
-            HAL_GPIO_WritePin(am2302_pin[channel].port,am2302_pin[channel].pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(port,pin, GPIO_PIN_SET);
             if(send_data[byte] & (1 << (7 - bit))){
                 us_tim_delay(t_1);
             }else{
                 us_tim_delay(t_0);
             }
-            HAL_GPIO_WritePin(am2302_pin[channel].port,am2302_pin[channel].pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(port,pin, GPIO_PIN_RESET);
         }
     }
     us_tim_delay(t_en);
@@ -250,13 +265,25 @@ void am2302_send(am2302_data_t data, uint8_t channel){
 
     // Config AM2032_PIN to IN
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    HAL_GPIO_Init (am2302_pin[channel].port, &GPIO_InitStruct);
+    HAL_GPIO_Init (port, &GPIO_InitStruct);
+    return result;
 }
 
 
-am2302_data_t am2302_get_rtc(uint8_t channel){
+/**
+ * @brief Get RTC from device like AM2302 protocol
+ * @param port - port of connected pin like GPIOx
+ * @param pin - pin number like GPIO_PIN_x
+ * @param data - pointer to am2302_data_t var
+ * @return  0 - OK,\n
+ *          -1 - Device response timeout error,\n
+ *          -2 - Paritet error,\n
+ *          -3 - Read empty
+ * @ingroup am2302
+ */
+int am2302_get_rtc(GPIO_TypeDef* port, uint16_t pin, am2302_data_t* data){
 
-    am2302_data_t result = {0};
+    int result = 0;
     uint32_t T = 0;
     uint8_t i = 0;
     uint8_t read_data[5] = {0};
@@ -268,8 +295,8 @@ am2302_data_t am2302_get_rtc(uint8_t channel){
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Pin = am2302_pin[channel].pin;
-    HAL_GPIO_Init (am2302_pin[channel].port, &GPIO_InitStruct);
+    GPIO_InitStruct.Pin = pin;
+    HAL_GPIO_Init (port, &GPIO_InitStruct);
 
     /*
     // SDA = 0
@@ -292,34 +319,37 @@ am2302_data_t am2302_get_rtc(uint8_t channel){
     current_time = us_tim_get_value();
 
     // Wait SDA->0 or AM2302_TIMEOUT
-    while ((HAL_GPIO_ReadPin(am2302_pin[channel].port, am2302_pin[channel].pin) == 1) &&
+    while ((HAL_GPIO_ReadPin(port, pin) == 1) &&
         (time_left < AM2302_TIMEOUT)) {
         time_left = us_tim_get_value() - current_time;
     }
     if (time_left > AM2302_TIMEOUT) {
-        result.error = 1;
+        data->error = 1;
+        result = -1;    // Device response timeout error
     } else {
        current_time = us_tim_get_value();     // Update current_time
     }
 
     // Wait SDA->1 or AM2302_TIMEOUT
-    while ((HAL_GPIO_ReadPin (am2302_pin[channel].port, am2302_pin[channel].pin) == 0) &&
+    while ((HAL_GPIO_ReadPin (port, pin) == 0) &&
            (time_left < AM2302_TIMEOUT)) {
            time_left = us_tim_get_value() - current_time;
     }
     if (time_left > AM2302_TIMEOUT) {
-        result.error = 1;
+        data->error = 1;
+        result = -1;    // Device response timeout error
     } else {
        current_time = us_tim_get_value();     // Update current_time
     }
 
     // Wait SDA->0 or AM2302_TIMEOUT
-    while ((HAL_GPIO_ReadPin(am2302_pin[channel].port, am2302_pin[channel].pin) == 1) &&
+    while ((HAL_GPIO_ReadPin(port, pin) == 1) &&
            (time_left < AM2302_TIMEOUT)) {
            time_left = us_tim_get_value() - current_time;
     }
     if (time_left > AM2302_TIMEOUT) {
-        result.error = 1;
+        data->error = 1;
+        result = -1;    // Device response timeout error
     } else {
        current_time = us_tim_get_value();     // Update current_time
     }
@@ -329,24 +359,26 @@ am2302_data_t am2302_get_rtc(uint8_t channel){
         for( i = 8; i > 0; i--) {
 
             // Wait SDA->1 or AM2302_TIMEOUT
-            while ((HAL_GPIO_ReadPin (am2302_pin[channel].port, am2302_pin[channel].pin) == 0) &&
+            while ((HAL_GPIO_ReadPin (port, pin) == 0) &&
                    (time_left < AM2302_TIMEOUT)) {
                    time_left = us_tim_get_value() - current_time;
             }
             if (time_left > AM2302_TIMEOUT) {
-                result.error = 1;
+                data->error = 1;
+                result = -1;    // Device response timeout error
             } else {
                current_time = us_tim_get_value();     // Update current_time
                T = time_left;
             }
 
             // Wait SDA->0 or AM2302_TIMEOUT
-            while ((HAL_GPIO_ReadPin(am2302_pin[channel].port, am2302_pin[channel].pin) == 1) &&
+            while ((HAL_GPIO_ReadPin(port, pin) == 1) &&
                    (time_left < AM2302_TIMEOUT)) {
                    time_left = us_tim_get_value() - current_time;
             }
             if (time_left > AM2302_TIMEOUT) {
-                result.error = 1;
+                data->error = 1;
+                result = -1;    // Device response timeout error
             } else {
                current_time = us_tim_get_value();     // Update current_time
                if(time_left > T){
@@ -362,14 +394,16 @@ am2302_data_t am2302_get_rtc(uint8_t channel){
             paritet += read_data[i];
         }
         if(paritet == read_data[4]){
-            result.hum = read_data[0]*256 + read_data[1];
-            result.tmpr = read_data[2]*256 + read_data[3];
-            result.paritet = read_data[4];
+            data->hum = read_data[0]*256 + read_data[1];
+            data->tmpr = read_data[2]*256 + read_data[3];
+            data->paritet = read_data[4];
         }else{
-            result.error = 1;
+            data->error = 1;
+            result = -2;    // Paritet error
         }
     }else{
-        result.error = 1;
+        data->error = 1;
+        result = -3;        // Read empty
     }
     return result;
 }
